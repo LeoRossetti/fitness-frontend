@@ -145,7 +145,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-[#6B7280] text-center">
-                  "TrainerHub transformed how I manage my fitness business. The scheduling and progress tracking saves me hours of planning."
+                  TrainerHub transformed how I manage my fitness business. The scheduling and progress tracking saves me hours of planning.
                 </p>
               </div>
               <div className="bg-white rounded-lg shadow-sm p-6">
@@ -155,7 +155,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-[#6B7280] text-center">
-                  "The workout builder is a game-changer for my client base. The automated reminders are a bonus!"
+                  The workout builder is a game-changer for my client base. The automated reminders are a bonus!
                 </p>
               </div>
               <div className="bg-white rounded-lg shadow-sm p-6">
@@ -165,7 +165,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-[#6B7280] text-center">
-                  "Since using TrainerHub, I've doubled my client list. The platform makes managing sessions seamless."
+                  Since using TrainerHub, I've doubled my client list. The platform makes managing sessions seamless.
                 </p>
               </div>
             </div>
