@@ -6,8 +6,8 @@ import { Client } from '../types/types';
 
 interface ClientFormProps {
   onSubmit: (client: Client) => void;
-  initialData?: Client; // Добавляем пропс для предзаполнения данных
-  isEditMode?: boolean; // Добавляем флаг для режима редактирования
+  initialData?: Client;
+  isEditMode?: boolean;
 }
 
 export default function ClientForm({ onSubmit, initialData, isEditMode = false }: ClientFormProps) {
@@ -108,10 +108,17 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
         setNextSession('');
         setFile(null);
       }
-    } catch (err: any) {
+    } catch (err: unknown) { // Используем unknown вместо Error
       console.error('Fetch error:', err);
-      if (!errors.email) {
-        setErrors({ form: err.message });
+      // Проверяем, является ли err экземпляром Error
+      if (err instanceof Error) {
+        if (!errors.email) {
+          setErrors({ form: err.message });
+        }
+      } else {
+        if (!errors.email) {
+          setErrors({ form: 'An unknown error occurred' });
+        }
       }
     } finally {
       setIsSubmitting(false);

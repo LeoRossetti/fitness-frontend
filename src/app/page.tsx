@@ -165,7 +165,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-[#6B7280] text-center">
-                  Since using TrainerHub, I've doubled my client list. The platform makes managing sessions seamless.
+                  Since using TrainerHub, I have doubled my client list. The platform makes managing sessions seamless.
                 </p>
               </div>
             </div>
