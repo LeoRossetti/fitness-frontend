@@ -8,6 +8,7 @@ export interface Client {
   notes?: string;
   profile?: string;
   plan?: 'Premium Monthly' | 'Standard Weekly' | 'Single Session';
+  type: 'Subscription' | 'One-time';
   nextSession?: string;
 }
 

@@ -1,75 +1,59 @@
 "use client";
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { Client } from '../types/types';
+import { Client } from '@/types/types';
+import { Edit, Trash2 } from 'lucide-react';
 
 interface ClientCardProps {
   client: Client;
   onDelete: () => void;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337';
-
 export default function ClientCard({ client, onDelete }: ClientCardProps) {
-  const isSubscription = client.plan === 'Premium Monthly' || client.plan === 'Standard Weekly';
+    // Определяем тег на основе поля plan
+    const tag = client.plan === 'Single Session' ? 'Single Session' : 'Subscription';
 
   return (
-    <div className="flex items-center justify-between py-4">
+    <div className="flex items-center justify-between py-3">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
-          {client.profile ? (
-            <Image
-              src={`${API_URL}${client.profile}`} // Полный URL для изображения
-              alt={client.name}
-              width={40}
-              height={40}
-              className="object-cover w-full h-full"
-            />
-          ) : (
-            <span className="text-gray-500 text-xl">👤</span>
-          )}
-        </div>
+        <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-black">{client.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-base font-semibold text-[#1F2A44]">{client.name}</h3>
             <span
-              className={`text-xs px-2 py-1 rounded-full ${
-                isSubscription ? 'bg-[#8B5CF6] text-white' : 'bg-gray-200 text-gray-600'
+              className={`text-xs px-2 py-0.5 rounded-full ${
+                tag === 'Subscription' ? 'bg-[#A78BFA] text-white' : 'bg-[#D1D5DB] text-[#1F2A44]'
               }`}
             >
-              {isSubscription ? 'Subscription' : 'One-time'}
+              {tag}
             </span>
           </div>
-          <p className="text-sm text-[#6B7280]">{client.email}</p>
-          <div className="flex gap-2 mt-1">
-            <p className="text-sm text-[#6B7280]">
-              <span className="font-bold">PLAN </span>
-              {client.plan || 'Not Specified'}
-            </p>
-            <p className="text-sm text-[#6B7280]">
-              <span className="font-bold">GOAL </span>
-              {client.goal || 'Not Specified'}
-            </p>
-            <p className="text-sm text-[#6B7280]">
-              <span className="font-bold">NEXT SESSION </span>
-              {client.nextSession || 'Not Scheduled'}
-            </p>
+          <p className="text-xs text-[#6B7280] mb-1">{client.email}</p>
+          <div className="flex gap-3 text-[#6B7280]">
+            <div>
+              <span className="text-xs font-medium">PLAN</span>
+              <p className="text-xs">{client.plan}</p>
+            </div>
+            <div>
+              <span className="text-xs font-medium">GOAL</span>
+              <p className="text-xs">{client.goal}</p>
+            </div>
+            <div>
+              <span className="text-xs font-medium">NEXT SESSION</span>
+              <p className="text-xs">{client.nextSession}</p>
+            </div>
           </div>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Link href={`/client/${client.id}`}>
-          <button className="text-gray-600 hover:text-gray-800">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"></path>
-            </svg>
+          <button className="flex items-center gap-1 border border-gray-300 text-[#1F2A44] px-2 py-1 cursor-pointer rounded hover:border-gray-500 hover:bg-gray-100 transition-colors">
+            <Edit className="h-4 w-4" />
+            <span className="text-sm">Edit</span>
           </button>
         </Link>
-        <button onClick={onDelete} className="text-[#EF4444] hover:text-[#DC2626]">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1z"></path>
-          </svg>
+        <button onClick={onDelete} className="border border-gray-300 text-[#EF4444] p-1 cursor-pointer rounded hover:border-[#EF4444] hover:bg-gray-100 transition-colors">
+          <Trash2 className="h-5 w-5" />
         </button>
       </div>
     </div>
