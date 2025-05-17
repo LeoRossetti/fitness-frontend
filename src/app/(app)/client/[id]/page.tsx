@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import ClientForm from '@/components/ClientForm';
 import { Client } from '@/types/types';
-import { getClientById } from '@/utils/api';
+import { getClientById } from '@/utils/api/api';
 
 export default function ClientDetailPage() {
   const router = useRouter();

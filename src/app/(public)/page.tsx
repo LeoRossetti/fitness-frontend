@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Dumbbell, Users, Calendar, MessageCircle, ArrowUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+
 export default function HomePage() {
   const [isArrowVisible, setIsArrowVisible] = useState(false);
 
@@ -30,25 +31,12 @@ export default function HomePage() {
   };
   return (
     <>
-      {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 max-w-6xl mx-auto bg-white/80 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <Dumbbell className="h-6 w-6 text-[#7c3aed]" />
-          <span className="text-[#1F2A44] text-xl font-bold">TrainerHub</span>
-        </div>
-        <Link href="/clients">
-          <button className="bg-[#7c3aed] text-white px-6 py-2 rounded-lg hover:bg-[#3A0066] transition-colors cursor-pointer">
-            Go to Dashboard
-          </button>
-        </Link>
-      </header>
-
       {/* Main Content */}
       <main className="bg-white">
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-[#FFFF] to-[#dacdf0] py-16" id='hero-section'>
           <div className="max-w-6xl mx-auto text-center">
-            <h1 className="text-5xl font-bold text-[#7c3aed] mb-4 leading-tight">
+            <h1 className="text-6xl font-bold text-[#7c3aed] mb-4 leading-tight">
               Transform your <br /> Training Business
             </h1>
             <p className="text-lg text-[#6B7280] mb-8">
@@ -302,7 +290,7 @@ export default function HomePage() {
       {isArrowVisible && (
         <button
           onClick={scrollToHero}
-          className="fixed bottom-8 right-8 p-3 bg-[#7c3aed] text-white rounded-full shadow-lg hover:bg-[#3A0066] transition-all duration-300 ease-in-out transform hover:scale-110 z-50"
+          className="fixed bottom-8 right-8 p-3 bg-[#7c3aed] text-white rounded-full shadow-lg hover:bg-[#3A0066] transition-all duration-300 ease-in-out transform hover:scale-110 z-50 cursor-pointer"
           aria-label="Scroll to top"
         >
           <ArrowUp className="h-6 w-6" />

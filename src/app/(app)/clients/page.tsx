@@ -5,7 +5,7 @@ import ClientCard from '@/components/ClientCard';
 import ClientForm from '@/components/ClientForm';
 import Modal from '@/components/Modal';
 import { Client } from '@/types/types';
-import { getClients, deleteClient } from '@/utils/api';
+import { getClients, deleteClient } from '@/utils/api/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
 
 export default function ClientsPage() {
