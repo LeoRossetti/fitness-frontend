@@ -1,7 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337';
 
 export const getClients = async () => {
-  const response = await fetch(`${API_URL}/api/clients`);
+  const response = await fetch(`${API_URL}/api/clients`, {
+    credentials: 'include',
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch clients');
   }
@@ -15,6 +17,7 @@ export const createClient = async (data: { name: string; email: string }) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
+    credentials: 'include',
   });
   if (!response.ok) {
     throw new Error('Failed to create client');

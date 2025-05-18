@@ -18,17 +18,16 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
     phone: initialData?.phone || '',
     address: initialData?.address || '',
     notes: initialData?.notes || '',
-    plan: initialData?.plan || 'Premium Monthly' as 'Premium Monthly' | 'Standard Weekly' | 'Single Session',
+    plan: initialData?.plan || 'Premium Monthly',
+    type: initialData?.type || 'Subscription',
     nextSession: initialData?.nextSession || '',
-    type: initialData?.plan || 'Subscription' as 'Subscription' | 'One-time',
   });
+
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -43,24 +42,10 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
     e.preventDefault();
     e.stopPropagation();
 
-    if (isSubmitting) {
-      console.log('Submit prevented: Already submitting');
-      return;
-    }
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
-    const data = {
-      name: formData.name,
-      email: formData.email,
-      goal: formData.goal,
-      phone: formData.phone,
-      address: formData.address,
-      notes: formData.notes,
-      plan: formData.plan,
-      nextSession: formData.nextSession,
-    };
-
-    const validationErrors = validateClientForm(data);
+    const validationErrors = validateClientForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setIsSubmitting(false);
@@ -68,14 +53,9 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
     }
 
     const formDataToSubmit = new FormData();
-    formDataToSubmit.append('name', formData.name);
-    formDataToSubmit.append('email', formData.email);
-    if (formData.goal) formDataToSubmit.append('goal', formData.goal);
-    if (formData.phone) formDataToSubmit.append('phone', formData.phone);
-    if (formData.address) formDataToSubmit.append('address', formData.address);
-    if (formData.notes) formDataToSubmit.append('notes', formData.notes);
-    formDataToSubmit.append('plan', formData.plan);
-    if (formData.nextSession) formDataToSubmit.append('nextSession', formData.nextSession);
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) formDataToSubmit.append(key, value);
+    });
     if (file) formDataToSubmit.append('profile', file);
 
     try {
@@ -84,27 +64,23 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
         : `${process.env.NEXT_PUBLIC_API_URL}/api/clients`;
       const method = isEditMode ? 'PUT' : 'POST';
 
-      console.log(`Sending ${method} request to:`, url);
-      console.log('FormData entries:', [...formDataToSubmit.entries()]);
       const response = await fetch(url, {
         method,
         body: formDataToSubmit,
+        credentials: 'include', // 👈 Ключевая строка для передачи JWT cookie
       });
 
-      console.log('Response status:', response.status);
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Response error:', errorData);
         if (errorData.error === 'Email already exists') {
           setErrors({ email: 'This email is already in use' });
         } else {
           setErrors({ form: errorData.error || 'Failed to save client' });
         }
-        throw new Error(errorData.error || 'Failed to save client');
+        throw new Error(errorData.error);
       }
 
       const client = await response.json();
-      console.log('Client saved:', client);
       onSubmit(client);
       setErrors({});
       if (!isEditMode) {
@@ -116,21 +92,15 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
           address: '',
           notes: '',
           plan: 'Premium Monthly',
-          nextSession: '',
           type: 'Subscription',
+          nextSession: '',
         });
         setFile(null);
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Fetch error:', err);
-      if (err instanceof Error) {
-        if (!errors.email) {
-          setErrors({ form: err.message });
-        }
-      } else {
-        if (!errors.email) {
-          setErrors({ form: 'An unknown error occurred' });
-        }
+      if (!errors.email) {
+        setErrors({ form: err.message || 'An unknown error occurred' });
       }
     } finally {
       setIsSubmitting(false);
@@ -141,6 +111,7 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
     <div>
       <h2 className="text-xl font-bold text-[#1F2A44] mb-4">{isEditMode ? 'Edit Client' : 'Add New Client'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Имя */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
@@ -148,10 +119,12 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
           />
-          {errors.name && <p className="text-[#EF4444] text-sm mt-1">{errors.name}</p>}
+          {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
+
+        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input
@@ -159,100 +132,90 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
           />
-          {errors.email && <p className="text-[#EF4444] text-sm mt-1">{errors.email}</p>}
+          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Goal</label>
-          <input
-            type="text"
-            name="goal"
-            value={formData.goal}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-          <input
-            type="text"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
-            rows={3}
-          />
-        </div>
+
+        {/* Остальные поля */}
+        {[
+          { name: 'goal', label: 'Goal' },
+          { name: 'phone', label: 'Phone' },
+          { name: 'address', label: 'Address' },
+          { name: 'notes', label: 'Notes', type: 'textarea' },
+          { name: 'nextSession', label: 'Next Session', placeholder: 'e.g., Today, 10:00 AM' },
+        ].map(({ name, label, type, placeholder }) => (
+          <div key={name}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            {type === 'textarea' ? (
+              <textarea
+                name={name}
+                value={formData[name as keyof typeof formData]}
+                onChange={handleChange}
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
+                rows={3}
+              />
+            ) : (
+              <input
+                type="text"
+                name={name}
+                value={formData[name as keyof typeof formData]}
+                onChange={handleChange}
+                placeholder={placeholder}
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
+              />
+            )}
+          </div>
+        ))}
+
+        {/* Plan */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Plan</label>
           <select
             name="plan"
             value={formData.plan}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
           >
             <option value="Premium Monthly">Premium Monthly</option>
             <option value="Standard Weekly">Standard Weekly</option>
             <option value="Single Session">Single Session</option>
           </select>
         </div>
+
+        {/* Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
           <select
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
           >
             <option value="Subscription">Subscription</option>
             <option value="One-time">One-time</option>
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Next Session</label>
-          <input
-            type="text"
-            name="nextSession"
-            value={formData.nextSession}
-            onChange={handleChange}
-            placeholder="e.g., Today, 10:00 AM"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
-          />
-        </div>
+
+        {/* Фото */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="w-full p-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#E5E7EB] file:text-[#1F2A44] hover:file:bg-[#D1D5DB]"
+            className="w-full border rounded-lg p-2 file:bg-gray-100 file:border file:rounded file:px-4"
           />
         </div>
-        {errors.form && <p className="text-[#EF4444] text-sm mt-1">{errors.form}</p>}
+
+        {/* Ошибка формы */}
+        {errors.form && <p className="text-red-500 text-sm">{errors.form}</p>}
+
+        {/* Submit */}
         <div className="flex justify-end">
           <button
             type="submit"
-            className="bg-[#3B82F6] text-white px-6 py-2 rounded-lg hover:bg-[#2563EB] transition-colors"
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
             disabled={isSubmitting}
           >
             {isEditMode ? 'Save Changes' : 'Submit'}

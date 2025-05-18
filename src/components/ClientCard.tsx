@@ -19,7 +19,7 @@ export default function ClientCard({ client, onDelete }: ClientCardProps) {
         <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-base font-semibold text-[#1F2A44]">{client.name}</h3>
+            <h3 className="text-base font-semibold text-[#1F2A44]">{client.User?.name}</h3>
             <span
               className={`text-xs px-2 py-0.5 rounded-full ${
                 tag === 'Subscription' ? 'bg-[#A78BFA] text-white' : 'bg-[#D1D5DB] text-[#1F2A44]'
@@ -28,7 +28,7 @@ export default function ClientCard({ client, onDelete }: ClientCardProps) {
               {tag}
             </span>
           </div>
-          <p className="text-xs text-[#6B7280] mb-1">{client.email}</p>
+          <p className="text-xs text-[#6B7280] mb-1">{client.User?.email}</p>
           <div className="flex gap-3 text-[#6B7280]">
             <div>
               <span className="text-xs font-medium">PLAN</span>
