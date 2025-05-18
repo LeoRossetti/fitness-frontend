@@ -2,7 +2,7 @@
 
 import { Dumbbell } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import {useRouter } from 'next/navigation';
 import AuthModal from './AuthModal';
 
 type User = {
@@ -13,7 +13,6 @@ type User = {
 
 export default function Header() {
   const router = useRouter();
-  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
 
