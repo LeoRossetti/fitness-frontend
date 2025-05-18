@@ -32,7 +32,7 @@ export default function DashboardHeader() {
             className="ml-2 bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
             onClick={handleLogout}
           >
-            Выйти
+            Sign Out
           </button>
         </div>
       ) : null}

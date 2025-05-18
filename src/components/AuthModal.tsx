@@ -135,7 +135,7 @@ export default function AuthModal({ onClose }: Props) {
             disabled={loading}
             className="w-full bg-[#7c3aed] text-white py-2 rounded-md hover:bg-[#5b21b6] transition-colors font-medium"
           >
-            {loading ? 'Загрузка...' : isRegistering ? 'Register' : 'Sign In'}
+            {loading ? 'Loading...' : isRegistering ? 'Register' : 'Sign In'}
           </button>
         </form>
 
