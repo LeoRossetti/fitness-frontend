@@ -67,7 +67,7 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
       const response = await fetch(url, {
         method,
         body: formDataToSubmit,
-        credentials: 'include', // 👈 Ключевая строка для передачи JWT cookie
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -97,10 +97,12 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
         });
         setFile(null);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Fetch error:', err);
       if (!errors.email) {
-        setErrors({ form: err.message || 'An unknown error occurred' });
+        const errorMessage =
+          err instanceof Error ? err.message : 'An unknown error occurred';
+        setErrors({ form: errorMessage });
       }
     } finally {
       setIsSubmitting(false);
@@ -111,7 +113,6 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
     <div>
       <h2 className="text-xl font-bold text-[#1F2A44] mb-4">{isEditMode ? 'Edit Client' : 'Add New Client'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Имя */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
           <input
@@ -124,7 +125,6 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
           {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
 
-        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input
@@ -137,7 +137,6 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
           {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
         </div>
 
-        {/* Остальные поля */}
         {[
           { name: 'goal', label: 'Goal' },
           { name: 'phone', label: 'Phone' },
@@ -168,7 +167,6 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
           </div>
         ))}
 
-        {/* Plan */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Plan</label>
           <select
@@ -183,7 +181,6 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
           </select>
         </div>
 
-        {/* Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
           <select
@@ -197,7 +194,6 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
           </select>
         </div>
 
-        {/* Фото */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
           <input
@@ -208,10 +204,8 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
           />
         </div>
 
-        {/* Ошибка формы */}
         {errors.form && <p className="text-red-500 text-sm">{errors.form}</p>}
 
-        {/* Submit */}
         <div className="flex justify-end">
           <button
             type="submit"
