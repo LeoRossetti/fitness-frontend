@@ -1,6 +1,5 @@
 "use client";
 
-import Link from 'next/link';
 import { Client } from '@/types/types';
 import { Edit, Trash2 } from 'lucide-react';
 
@@ -9,9 +8,14 @@ interface ClientCardProps {
   onDelete: () => void;
 }
 
-export default function ClientCard({ client, onDelete }: ClientCardProps) {
-    // Определяем тег на основе поля plan
-    const tag = client.plan === 'Single Session' ? 'Single Session' : 'Subscription';
+interface ClientCardProps {
+  client: Client;
+  onDelete: () => void;
+  onEdit: (clientId: number) => void; // <== новое
+}
+
+export default function ClientCard({ client, onDelete, onEdit }: ClientCardProps) {
+  const tag = client.plan === 'Single Session' ? 'Single Session' : 'Subscription';
 
   return (
     <div className="flex items-center justify-between py-3">
@@ -46,13 +50,17 @@ export default function ClientCard({ client, onDelete }: ClientCardProps) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Link href={`/client/${client.id}`}>
-          <button className="flex items-center gap-1 border border-gray-300 text-[#1F2A44] px-2 py-1 cursor-pointer rounded hover:border-gray-500 hover:bg-gray-100 transition-colors">
-            <Edit className="h-4 w-4" />
-            <span className="text-sm">Edit</span>
-          </button>
-        </Link>
-        <button onClick={onDelete} className="border border-gray-300 text-[#EF4444] p-1 cursor-pointer rounded hover:border-[#EF4444] hover:bg-gray-100 transition-colors">
+        <button
+          onClick={() => onEdit(client.id)}
+          className="flex items-center gap-1 border border-gray-300 text-[#1F2A44] px-2 py-1 cursor-pointer rounded hover:border-gray-500 hover:bg-gray-100 transition-colors"
+        >
+          <Edit className="h-4 w-4" />
+          <span className="text-sm">Edit</span>
+        </button>
+        <button
+          onClick={onDelete}
+          className="border border-gray-300 text-[#EF4444] p-1 cursor-pointer rounded hover:border-[#EF4444] hover:bg-gray-100 transition-colors"
+        >
           <Trash2 className="h-5 w-5" />
         </button>
       </div>

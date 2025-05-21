@@ -4,6 +4,11 @@ const config: Config = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      colors: {
+        main: {
+          DEFAULT: '#7c3aed',
+        },
+      },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
       },
@@ -14,6 +19,9 @@ const config: Config = {
         },
       },
     },
+  },
+  future: {
+    hoverOnlyWhenSupported: true,
   },
   plugins: [],
 };

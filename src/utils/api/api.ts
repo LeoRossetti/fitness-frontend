@@ -28,6 +28,7 @@ export const createClient = async (data: { name: string; email: string }) => {
 export const deleteClient = async (id: number) => {
   const response = await fetch(`${API_URL}/api/clients/${id}`, {
     method: 'DELETE',
+    credentials: 'include', // <-- это критически важно
   });
   if (!response.ok) {
     throw new Error('Failed to delete client');
@@ -35,7 +36,9 @@ export const deleteClient = async (id: number) => {
 };
 
 export const getClientById = async (id: number) => {
-  const response = await fetch(`${API_URL}/api/clients/${id}`);
+  const response = await fetch(`${API_URL}/api/clients/${id}`, {
+    credentials: 'include', // ← обязательно, чтобы передать токен с cookie
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch client');
   }

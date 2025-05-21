@@ -142,7 +142,7 @@ export default function AuthModal({ onClose }: Props) {
         <p className="text-sm mt-4 text-center text-gray-600">
           {isRegistering ? 'Already have an account?' : 'No account?'}{' '}
           <button
-            className="text-[#7c3aed] hover:underline font-medium"
+            className="text-main hover:underline font-medium"
             onClick={() => setIsRegistering(!isRegistering)}
           >
             {isRegistering ? 'Sign In' : 'Register'}

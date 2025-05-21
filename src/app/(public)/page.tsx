@@ -36,7 +36,7 @@ export default function HomePage() {
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-[#FFFF] to-[#dacdf0] py-16" id='hero-section'>
           <div className="max-w-6xl mx-auto text-center">
-            <h1 className="text-6xl font-bold text-[#7c3aed] mb-4 leading-tight">
+            <h1 className="text-6xl font-bold text-main mb-4 leading-tight">
               Transform your <br /> Training Business
             </h1>
             <p className="text-lg text-[#6B7280] mb-8">
@@ -64,7 +64,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
                 <div className="w-12 h-12 bg-[#E6E6FA] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-6 w-6 text-[#7c3aed]" />
+                  <Users className="h-6 w-6 text-main" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#1F2A44] mb-2">Client Management</h3>
                 <p className="text-[#6B7280]">
@@ -73,7 +73,7 @@ export default function HomePage() {
               </div>
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
                 <div className="w-12 h-12 bg-[#E6E6FA] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Dumbbell className="h-6 w-6 text-[#7c3aed]" />
+                  <Dumbbell className="h-6 w-6 text-main" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#1F2A44] mb-2">Workout Builder</h3>
                 <p className="text-[#6B7280]">
@@ -82,7 +82,7 @@ export default function HomePage() {
               </div>
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
                 <div className="w-12 h-12 bg-[#E6E6FA] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-6 w-6 text-[#7c3aed]" />
+                  <Calendar className="h-6 w-6 text-main" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#1F2A44] mb-2">Smart Scheduling</h3>
                 <p className="text-[#6B7280]">
@@ -91,7 +91,7 @@ export default function HomePage() {
               </div>
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
                 <div className="w-12 h-12 bg-[#E6E6FA] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Dumbbell className="h-6 w-6 text-[#7c3aed]" />
+                  <Dumbbell className="h-6 w-6 text-main" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#1F2A44] mb-2">Progress Tracking</h3>
                 <p className="text-[#6B7280]">
@@ -109,7 +109,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-[#E6E6FA] rounded-lg p-6 text-center">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="h-6 w-6 text-[#7c3aed]" />
+                  <Calendar className="h-6 w-6 text-main" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#1F2A44] mb-2">Save Time</h3>
                 <p className="text-[#6B7280]">
@@ -118,7 +118,7 @@ export default function HomePage() {
               </div>
               <div className="bg-[#E6E6FA] rounded-lg p-6 text-center">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-6 w-6 text-[#7c3aed]" />
+                  <Users className="h-6 w-6 text-main" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#1F2A44] mb-2">Grow Your Business</h3>
                 <p className="text-[#6B7280]">
@@ -127,7 +127,7 @@ export default function HomePage() {
               </div>
               <div className="bg-[#E6E6FA] rounded-lg p-6 text-center">
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Dumbbell className="h-6 w-6 text-[#7c3aed]" />
+                  <Dumbbell className="h-6 w-6 text-main" />
                 </div>
                 <h3 className="text-xl font-semibold text-[#1F2A44] mb-2">Delight Clients</h3>
                 <p className="text-[#6B7280]">
@@ -146,14 +146,14 @@ export default function HomePage() {
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex justify-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-[#7c3aed]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg key={i} className="w-5 h-5 text-main" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                   ))}
                 </div>
                 <div className="flex justify-center mb-4">
                   <div className="w-8 h-8 bg-[#EDE9FE] rounded-full flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5 text-[#7c3aed]" />
+                    <MessageCircle className="h-5 w-5 text-main" />
                   </div>
                 </div>
                 <p className="text-[#6B7280] text-center mb-4">
@@ -168,14 +168,14 @@ export default function HomePage() {
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex justify-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-[#7c3aed]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg key={i} className="w-5 h-5 text-main" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                   ))}
                 </div>
                 <div className="flex justify-center mb-4">
                   <div className="w-8 h-8 bg-[#EDE9FE] rounded-full flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5 text-[#7c3aed]" />
+                    <MessageCircle className="h-5 w-5 text-main" />
                   </div>
                 </div>
                 <p className="text-[#6B7280] text-center mb-4">
@@ -190,14 +190,14 @@ export default function HomePage() {
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex justify-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 text-[#7c3aed]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg key={i} className="w-5 h-5 text-main" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                   ))}
                 </div>
                 <div className="flex justify-center mb-4">
                   <div className="w-8 h-8 bg-[#EDE9FE] rounded-full flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5 text-[#7c3aed]" />
+                    <MessageCircle className="h-5 w-5 text-main" />
                   </div>
                 </div>
                 <p className="text-[#6B7280] text-center mb-4">
@@ -252,7 +252,7 @@ export default function HomePage() {
             <div className="mb-8">
               <div className="flex justify-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-[#7c3aed]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg key={i} className="w-5 h-5 text-main" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                   </svg>
                 ))}
@@ -269,7 +269,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold mb-4">Ready to Transform YOUR Training Experience?</h2>
             <p className="text-lg mb-8">Join TrainerHub today as a trainer or client and reach your fitness goals.</p>
             <Link href="/signup">
-              <button className="bg-white text-[#7c3aed] px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+              <button className="bg-white text-main px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
                 Sign Up Now
               </button>
             </Link>

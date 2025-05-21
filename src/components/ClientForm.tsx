@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { validateClientForm } from '../utils/validateClientForm';
 import { Client } from '../types/types';
+import { toast } from 'react-hot-toast';
 
 interface ClientFormProps {
   onSubmit: (client: Client) => void;
@@ -77,11 +78,13 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
         } else {
           setErrors({ form: errorData.error || 'Failed to save client' });
         }
+        toast.error(errorData.error || 'Failed to save client');
         throw new Error(errorData.error);
       }
 
       const client = await response.json();
       onSubmit(client);
+      toast.success(isEditMode ? 'Client updated!' : 'Client created!');
       setErrors({});
       if (!isEditMode) {
         setFormData({
@@ -110,34 +113,12 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-bold text-[#1F2A44] mb-4">{isEditMode ? 'Edit Client' : 'Add New Client'}</h2>
+    <div className="max-w-md w-full mx-auto">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">{isEditMode ? 'Edit Client' : 'Add New Client'}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
-          />
-          {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
-          />
-          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-        </div>
-
         {[
+          { name: 'name', label: 'Name' },
+          { name: 'email', label: 'Email', type: 'email' },
           { name: 'goal', label: 'Goal' },
           { name: 'phone', label: 'Phone' },
           { name: 'address', label: 'Address' },
@@ -151,19 +132,21 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
                 name={name}
                 value={formData[name as keyof typeof formData]}
                 onChange={handleChange}
-                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
+                placeholder={placeholder}
                 rows={3}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
               />
             ) : (
               <input
-                type="text"
+                type={type || 'text'}
                 name={name}
                 value={formData[name as keyof typeof formData]}
                 onChange={handleChange}
                 placeholder={placeholder}
-                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
               />
             )}
+            {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name]}</p>}
           </div>
         ))}
 
@@ -173,7 +156,7 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
             name="plan"
             value={formData.plan}
             onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           >
             <option value="Premium Monthly">Premium Monthly</option>
             <option value="Standard Weekly">Standard Weekly</option>
@@ -187,7 +170,7 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#3B82F6]"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           >
             <option value="Subscription">Subscription</option>
             <option value="One-time">One-time</option>
@@ -200,16 +183,23 @@ export default function ClientForm({ onSubmit, initialData, isEditMode = false }
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="w-full border rounded-lg p-2 file:bg-gray-100 file:border file:rounded file:px-4"
+            className="w-full border rounded-md px-3 py-2"
           />
         </div>
 
-        {errors.form && <p className="text-red-500 text-sm">{errors.form}</p>}
+        {errors.form && <p className="text-red-500 text-sm mt-1">{errors.form}</p>}
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2 pt-4">
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
           <button
             type="submit"
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+            className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
             disabled={isSubmitting}
           >
             {isEditMode ? 'Save Changes' : 'Submit'}

@@ -40,7 +40,7 @@ export default function Header() {
       <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md w-full">
         {/* Лого TrainerHub слева */}
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
-          <Dumbbell className="h-6 w-6 text-[#7c3aed]" />
+          <Dumbbell className="h-6 w-6 text-main" />
           <span className="text-[#1F2A44] text-xl font-bold">TrainerHub</span>
         </div>
 
