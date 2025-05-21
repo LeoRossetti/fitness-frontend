@@ -1,38 +1,25 @@
 'use client';
 
 import { Dumbbell } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import AuthModal from './AuthModal';
 import { Button } from './ui/button';
+import { useState } from 'react';
+import AuthModal from './AuthModal';
 
 export default function PublicHeader() {
   const [showModal, setShowModal] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
-    <>
-      <header className="flex justify-between items-center px-6 py-4 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2">
-          <Dumbbell className="text-main" />
-          <span className="text-xl font-bold text-primary">TrainerHub</span>
+    <header className="fixed top-0 left-0 right-0 z-50 flex justify-center">
+      <div className="w-full max-w-7xl bg-white/60 backdrop-blur-sm rounded-b-2xl px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Dumbbell className="h-7 w-7 text-main" />
+          <span className="text-2xl font-semibold text-primary">TrainerHub</span>
         </div>
-        <Button
-          variant="outline"
-          className="text-primary hover:bg-background-light"
-          onClick={() => setShowModal(true)}
-        >
+        <Button variant="default" onClick={() => setShowModal(true)}>
           Sign In / Sign Up
         </Button>
-      </header>
-      {showModal && <AuthModal onClose={() => setShowModal(false)} />}
-    </>
+      </div>
+      <AuthModal isOpen={showModal} onClose={() => setShowModal(false)} />
+    </header>
   );
 }

@@ -1,154 +1,139 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Modal } from './ui/modal';
 
-type Props = {
+interface AuthModalProps {
+  isOpen: boolean;
   onClose: () => void;
-};
+}
 
-export default function AuthModal({ onClose }: Props) {
+export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const router = useRouter();
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
+    name: '',
     role: 'Client',
   });
-  const [loading, setLoading] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const [mounted, setMounted] = useState(false); // флаг для плавного открытия
 
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 10); // запускает анимацию
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    const endpoint = isRegistering ? '/register' : '/login';
+    const endpoint = isLogin ? '/login' : '/register';
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth${endpoint}`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth${endpoint}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    if (res.ok) {
-      const user = await res.json();
-      handleClose();
-      router.push(user.role === 'Trainer' ? '/clients' : '/dashboard');
-    } else {
-      alert('Falied to login or register');
+      if (res.ok) {
+        const user = await res.json();
+        onClose();
+        router.push(user.role === 'Trainer' ? '/clients' : '/dashboard');
+      } else {
+        alert('Failed to login or register');
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      alert('An error occurred during authentication');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
-  const handleClose = () => {
-    setClosing(true);
-    setTimeout(() => {
-      onClose();
-    }, 300);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300 ${
-        closing ? 'opacity-0' : 'opacity-100'
-      } bg-black/40`}
-    >
-      <div
-        className={`relative w-full max-w-md bg-white rounded-lg shadow-xl p-8 transform transition-all duration-300 ${
-          closing || !mounted ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-        }`}
-      >
-        <button
-          onClick={handleClose}
-          className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl"
-        >
-          &times;
-        </button>
-
-        <h2 className="text-2xl font-semibold text-center mb-6 text-[#1F2A44]">
-          {isRegistering ? 'Create an account' : 'Sign in'}
-        </h2>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit();
-          }}
-        >
-          {isRegistering && (
-            <>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <input
-                className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7c3aed]"
+    <Modal isOpen={isOpen} onClose={onClose} title={isLogin ? 'Sign In' : 'Sign Up'}>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {!isLogin && (
+          <>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Name
+              </label>
+              <Input
+                id="name"
                 name="name"
-                placeholder="Name"
-                onChange={handleChange}
+                type="text"
                 required
-              />
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
-              <select
-                name="role"
-                className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7c3aed]"
+                value={formData.name}
                 onChange={handleChange}
-                value={form.role}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Account Type
+              </label>
+              <select
+                id="role"
+                name="role"
+                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={formData.role}
+                onChange={handleChange}
               >
                 <option value="Client">Client</option>
                 <option value="Trainer">Trainer</option>
               </select>
-            </>
-          )}
-
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7c3aed]"
+            </div>
+          </>
+        )}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <Input
+            id="email"
             name="email"
             type="email"
-            placeholder="johndoe@example.com"
-            onChange={handleChange}
             required
+            value={formData.email}
+            onChange={handleChange}
+            className="mt-1"
           />
-
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input
-            className="w-full mb-6 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#7c3aed]"
+        </div>
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <Input
+            id="password"
             name="password"
             type="password"
-            placeholder="••••••••"
-            onChange={handleChange}
             required
+            value={formData.password}
+            onChange={handleChange}
+            className="mt-1"
           />
-
+        </div>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
+        </Button>
+        <div className="text-center mt-4">
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#7c3aed] text-white py-2 rounded-md hover:bg-[#5b21b6] transition-colors font-medium"
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-sm text-main hover:text-main-dark"
           >
-            {loading ? 'Loading...' : isRegistering ? 'Register' : 'Sign In'}
+            {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
           </button>
-        </form>
-
-        <p className="text-sm mt-4 text-center text-gray-600">
-          {isRegistering ? 'Already have an account?' : 'No account?'}{' '}
-          <button
-            className="text-main hover:underline font-medium"
-            onClick={() => setIsRegistering(!isRegistering)}
-          >
-            {isRegistering ? 'Sign In' : 'Register'}
-          </button>
-        </p>
-      </div>
-    </div>
+        </div>
+      </form>
+    </Modal>
   );
 }

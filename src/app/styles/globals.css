@@ -34,6 +34,37 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Main color utilities */
 .text-main {
   color: var(--main);
+}
+.bg-main {
+  background-color: var(--main);
+}
+.hover\:bg-main-dark:hover {
+  background-color: var(--main-dark);
+}
+
+/* Text color utilities */
+.text-primary {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Background color utilities */
+.bg-background-light {
+  background-color: var(--background-light);
+}
+.bg-background-white {
+  background-color: var(--background-white);
+}
+
+/* Border utilities */
+.border-main {
+  border-color: var(--main);
+}
+.hover\:border-primary:hover {
+  border-color: var(--text-primary);
 }

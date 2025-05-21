@@ -7,7 +7,15 @@ const config: Config = {
       colors: {
         main: {
           DEFAULT: '#7c3aed',
+          light: '#dacdf0',
+          dark: '#5b21b6',
         },
+        background: {
+          white: '#FFFFFF',
+          light: '#F3F4F6',
+        },
+        primary: '#1F2A44',
+        secondary: '#6B7280',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

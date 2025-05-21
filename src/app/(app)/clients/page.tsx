@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ClientCard from '@/components/ClientCard';
-import ClientForm from '@/components/ClientForm';
-import Modal from '@/components/Modal';
+import AddClientModal from '@/components/AddClientModal';
 import EditClientModal from '@/components/EditClientModal';
 import { Client } from '@/types/types';
 import { getClients, deleteClient } from '@/utils/api/api';
@@ -75,12 +74,7 @@ export default function ClientsPage() {
     applyFilters('', 'All');
   };
 
-  const handleAddClient = (newClient: Client) => {
-    setClients(prev => {
-      if (prev.some(client => client.id === newClient.id)) return prev;
-      return [...prev, newClient];
-    });
-    setIsOpen(false);
+  const handleAddClient = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -160,18 +154,20 @@ export default function ClientsPage() {
               key={client.id}
               client={client}
               onDelete={() => handleDeleteClient(client.id)}
-              onEdit={(id) => setEditingClientId(id)} // ✅
+              onEdit={(id) => setEditingClientId(id)}
             />
           ))}
         </div>
       </div>
 
       {/* Добавление клиента */}
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <ClientForm onSubmit={handleAddClient} />
-      </Modal>
+      <AddClientModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onClientAdded={handleAddClient}
+      />
 
-      {/* ✅ Модалка редактирования клиента */}
+      {/* Модалка редактирования клиента */}
       {editingClientId !== null && (
         <EditClientModal
           clientId={editingClientId}
