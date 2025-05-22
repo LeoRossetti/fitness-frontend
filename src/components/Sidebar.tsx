@@ -1,100 +1,95 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Dumbbell, BarChart2, Calendar } from 'lucide-react';
+import { Dumbbell, LayoutDashboard, Users, BarChart2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useContext } from 'react';
+import { SidebarContext } from './SidebarProvider';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { collapsed, toggle } = useContext(SidebarContext);
 
-  // Не показываем сайдбар на домашней странице
-  if (pathname === '/') {
-    return null;
-  }
+  if (pathname === '/') return null;
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-64 bg-white shadow-md flex flex-col">
-      {/* Логотип/название */}
-      <div className="p-4 border-g inline-flex items-center">
-        <Dumbbell className='text-[#8B5CF6] h-5 w-5'/>
-        <h1 className="text-2xl font-bold text-[#000000]">TrainerHub</h1>
+    <aside
+      className={`fixed top-0 left-0 h-screen bg-white shadow-md flex flex-col transition-all duration-300
+        ${collapsed ? 'w-20' : 'w-64'}`}
+    >
+      {/* Кнопка сворачивания */}
+      <div className="p-4 flex justify-end">
+        <button
+          onClick={toggle}
+          className="text-gray-500 hover:text-gray-700 transition cursor-pointer"
+        >
+          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        </button>
       </div>
 
-      {/* Навигационные ссылки */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
-          <li>
-            <Link href="/dashboard">
-              <div
-                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                  pathname === '/dashboard'
-                    ? 'bg-[#8B5CF6] text-white'
-                    : 'text-[#1F2A44] hover:bg-gray-100'
-                }`}
-              >
-                <LayoutDashboard className="h-5 w-5" />
-                Dashboard
-              </div>
-            </Link>
-          </li>
-          <li>
-            <Link href="/clients">
-              <div
-                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                  pathname === '/clients'
-                    ? 'bg-[#8B5CF6] text-white'
-                    : 'text-[#1F2A44] hover:bg-gray-100'
-                }`}
-              >
-                <Users className="h-5 w-5" />
-                Clients
-              </div>
-            </Link>
-          </li>
-          <li>
-            <Link href="/workouts">
-              <div
-                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                  pathname === '/workouts'
-                    ? 'bg-[#8B5CF6] text-white'
-                    : 'text-[#1F2A44] hover:bg-gray-100'
-                }`}
-              >
-                <Dumbbell className="h-5 w-5" />
-                Workouts
-              </div>
-            </Link>
-          </li>
-          <li>
-            <Link href="/progress">
-              <div
-                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                  pathname === '/progress'
-                    ? 'bg-[#8B5CF6] text-white'
-                    : 'text-[#1F2A44] hover:bg-gray-100'
-                }`}
-              >
-                <BarChart2 className="h-5 w-5" />
-                Progress
-              </div>
-            </Link>
-          </li>
-          <li>
-            <Link href="/calendar">
-              <div
-                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
-                  pathname === '/calendar'
-                    ? 'bg-[#8B5CF6] text-white'
-                    : 'text-[#1F2A44] hover:bg-gray-100'
-                }`}
-              >
-                <Calendar className="h-5 w-5" />
-                Calendar
-              </div>
-            </Link>
-          </li>
-        </ul>
+      {/* Навигация */}
+      <nav className="flex-1 px-2 space-y-2">
+        <SidebarItem
+          href="/dashboard"
+          icon={<LayoutDashboard size={20} />}
+          label="Dashboard"
+          active={pathname === '/dashboard'}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          href="/clients"
+          icon={<Users size={20} />}
+          label="Clients"
+          active={pathname === '/clients'}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          href="/workouts"
+          icon={<Dumbbell size={20} />}
+          label="Workouts"
+          active={pathname === '/workouts'}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          href="/progress"
+          icon={<BarChart2 size={20} />}
+          label="Progress"
+          active={pathname === '/progress'}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          href="/calendar"
+          icon={<Calendar size={20} />}
+          label="Calendar"
+          active={pathname === '/calendar'}
+          collapsed={collapsed}
+        />
       </nav>
     </aside>
+  );
+}
+
+type SidebarItemProps = {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  collapsed: boolean;
+};
+
+function SidebarItem({ href, icon, label, active, collapsed }: SidebarItemProps) {
+  return (
+    <Link href={href}>
+      <div
+        className={`
+          flex items-center rounded-lg transition-all p-2
+          ${collapsed ? 'justify-center' : 'gap-3'}
+          ${active ? 'bg-[#8B5CF6] text-white' : 'text-[#1F2A44] hover:bg-gray-100'}
+        `}
+      >
+        {icon}
+        {!collapsed && <span className="whitespace-nowrap">{label}</span>}
+      </div>
+    </Link>
   );
 }
