@@ -281,7 +281,7 @@ export default function HomePage() {
       <footer className="bg-[#F7F7F7] py-8">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-[#6B7280] text-sm">
-            © {new Date().getFullYear()} TrainerHub. All rights reserved.
+            ©TrainerHub. All rights reserved.
           </p>
         </div>
       </footer>
