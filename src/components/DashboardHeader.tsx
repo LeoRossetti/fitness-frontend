@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { Dumbbell, Menu } from 'lucide-react';
+import { Dumbbell } from 'lucide-react';
 import { SidebarContext } from './SidebarProvider'; // импортируем контекст
 
 export default function DashboardHeader() {
