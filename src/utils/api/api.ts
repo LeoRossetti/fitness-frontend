@@ -44,3 +44,37 @@ export const getClientById = async (id: number) => {
   }
   return response.json();
 };
+
+export const getSessionsByDate = async (date: string) => {
+  const response = await fetch(`${API_URL}/api/sessions?date=${date}`, {
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Failed to fetch sessions');
+  return response.json();
+};
+
+export const createSession = async (data: {
+  clientId: number;
+  type: string;
+  time: string;
+  note: string;
+  date: string;
+}) => {
+  const response = await fetch(`${API_URL}/api/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to create session');
+  return response.json();
+};
+
+export const getSessionsByMonth = async (year: number, month: number) => {
+  const monthStr = String(month).padStart(2, '0');
+  const response = await fetch(`${API_URL}/api/sessions?month=${year}-${monthStr}`, {
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Failed to fetch sessions');
+  return response.json();
+};

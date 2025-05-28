@@ -41,6 +41,7 @@ export default function ClientsPage() {
     if (query) {
       const lowerQuery = query.toLowerCase();
       result = result.filter(client =>
+        
         client.User?.name?.toLowerCase().includes(lowerQuery) ||
         client.User?.email?.toLowerCase().includes(lowerQuery)
       );
