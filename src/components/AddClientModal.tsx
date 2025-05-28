@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Modal } from './ui/modal';
+import toast from 'react-hot-toast';
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -40,12 +41,13 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
       if (res.ok) {
         onClose();
         onClientAdded?.();
+        toast.success('Client added successfully');
       } else {
-        alert('Failed to add client');
+        toast.error('Failed to add client');
       }
     } catch (error) {
       console.error('Error adding client:', error);
-      alert('An error occurred while adding the client');
+      toast.error('An error occurred while adding the client');
     } finally {
       setLoading(false);
     }
@@ -182,18 +184,18 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
           <label htmlFor="nextSession" className="block text-sm font-medium text-gray-700">
             Next Session
           </label>
-          <Input
+          <input
             id="nextSession"
             name="nextSession"
-            type="text"
+            type="datetime-local"
             value={formData.nextSession}
             onChange={handleChange}
-            className="mt-1"
-            placeholder="e.g., Today, 10:00 AM"
+            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+            placeholder="Select date and time"
           />
         </div>
         <div className="flex gap-3">
-          <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+          <Button type="button" variant="danger" className="flex-1" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" className="flex-1" disabled={loading}>

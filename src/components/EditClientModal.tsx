@@ -7,6 +7,7 @@ import { Client } from "@/types/types";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Modal } from "./ui/modal";
+import toast from 'react-hot-toast';
 
 type Props = {
   clientId: number;
@@ -75,12 +76,13 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
         const updatedClient = await res.json();
         onUpdated?.(updatedClient);
         onClose();
+        toast.success('Client updated successfully');
       } else {
-        alert('Failed to update client');
+        toast.error('Failed to update client');
       }
     } catch (error) {
       console.error('Error updating client:', error);
-      alert('An error occurred while updating the client');
+      toast.error('An error occurred while updating the client');
     } finally {
       setLoading(false);
     }

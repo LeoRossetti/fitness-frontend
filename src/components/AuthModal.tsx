@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Modal } from './ui/modal';
+import toast from 'react-hot-toast';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -40,11 +41,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         onClose();
         router.push(user.role === 'Trainer' ? '/clients' : '/dashboard');
       } else {
-        alert('Failed to login or register');
+        toast.error('Failed to login or register');
       }
     } catch (error) {
       console.error('Auth error:', error);
-      alert('An error occurred during authentication');
+      toast.error('An error occurred during authentication');
     } finally {
       setLoading(false);
     }

@@ -60,14 +60,32 @@ export const createSession = async (data: {
   note: string;
   date: string;
 }) => {
-  const response = await fetch(`${API_URL}/api/sessions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create session');
-  return response.json();
+  try {
+    const response = await fetch(`${API_URL}/api/sessions`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      console.error('Server response:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(`Failed to create session: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error creating session:', error);
+    throw error;
+  }
 };
 
 export const getSessionsByMonth = async (year: number, month: number) => {
@@ -77,4 +95,12 @@ export const getSessionsByMonth = async (year: number, month: number) => {
   });
   if (!response.ok) throw new Error('Failed to fetch sessions');
   return response.json();
+};
+
+export const deleteSession = async (id: number) => {
+  const response = await fetch(`${API_URL}/api/sessions/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Failed to delete session');
 };

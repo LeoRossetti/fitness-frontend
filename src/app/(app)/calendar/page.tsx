@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { Plus, Clock, User, Calendar as CalendarIcon } from 'lucide-react';
-import { getSessionsByDate, getClients, createSession, getSessionsByMonth } from '@/utils/api/api';
+import { getClients, createSession, getSessionsByMonth, deleteSession } from '@/utils/api/api';
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { isSameDay } from 'date-fns';
 import { Select } from '@/components/ui/select';
+import { toast } from 'react-hot-toast';
 
 interface Session {
   id: number;
@@ -53,7 +53,12 @@ export default function CalendarPage() {
   // Загружаем клиентов при открытии модалки
   useEffect(() => {
     if (isAddModalOpen) {
-      getClients().then(setClients).catch(console.error);
+      getClients()
+        .then(setClients)
+        .catch((err) => {
+          console.error('Failed to fetch clients:', err);
+          toast.error('Failed to load clients');
+        });
     }
   }, [isAddModalOpen]);
 
@@ -71,35 +76,118 @@ export default function CalendarPage() {
   };
 
   // Обработчик изменения полей формы
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | { name: string, value: string }
+  ) => {
+    if ('target' in e) {
+      setForm((prev) => ({ ...prev, [e.target.name]: (e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).value }));
+    } else {
+      setForm((prev) => ({ ...prev, [e.name]: e.value }));
+    }
+  };
+
+  // Вспомогательная функция для извлечения времени из строки даты
+  const getTimeFromDateString = (dateStr: string) => {
+    const match = dateStr.match(/T(\d{2}:\d{2})/);
+    return match ? match[1] : '';
+  };
+
+  // Вспомогательная функция для получения имени клиента
+  const getClientName = (session: any) => {
+    return session.Client && session.Client.User && session.Client.User.name
+      ? session.Client.User.name
+      : '—';
   };
 
   // Генерируем опции времени с шагом 15 минут с 07:00 до 22:00
-  const timeOptions = Array.from({ length: ((22 - 7) * 4) + 1 }, (_, i) => {
-    const hour = 7 + Math.floor(i / 4);
-    const minute = (i % 4) * 15;
-    const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-    return { value, label: value };
-  });
+  const timeOptions = [
+    { value: '', label: 'Choose time', disabled: true },
+    ...Array.from({ length: ((22 - 7) * 4) + 1 }, (_, i) => {
+      const hour = 7 + Math.floor(i / 4);
+      const minute = (i % 4) * 15;
+      const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      return { value, label: value };
+    })
+  ];
 
   // Обработчик сохранения
   const handleSave = async () => {
-    if (!selectedDate) return;
+    if (!selectedDate || !form.time) {
+      toast.error('Please select a date and time');
+      return;
+    }
+
     try {
-      // Формируем дату сессии с временем
-      const date = `${selectedDate.toISOString().split('T')[0]}T${form.time}:00`;
-      await createSession({
+      // Создаем дату в локальной временной зоне
+      const localDate = new Date(selectedDate);
+      const [hours, minutes] = form.time.split(':').map(Number);
+      
+      // Проверяем валидность времени
+      if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        toast.error('Invalid time format');
+        return;
+      }
+
+      // Устанавливаем время в локальной временной зоне
+      localDate.setHours(hours, minutes, 0, 0);
+
+      // Проверяем, что дата валидна
+      if (isNaN(localDate.getTime())) {
+        toast.error('Invalid date');
+        return;
+      }
+
+      // Формируем дату в формате ISO с таймзоной пользователя (например, 2025-06-02T07:00:00+03:00)
+      const offset = -localDate.getTimezoneOffset();
+      const sign = offset >= 0 ? '+' : '-';
+      const pad = (n: number) => String(Math.floor(Math.abs(n))).padStart(2, '0');
+      const tz = `${sign}${pad(offset / 60)}:${pad(offset % 60)}`;
+      const date = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00${tz}`;
+
+      const sessionData = {
         clientId: Number(form.clientId),
         type: form.type,
         time: form.time,
         note: form.note,
         date,
+      };
+
+      console.log('Creating session with data:', sessionData);
+
+      await createSession(sessionData);
+
+      // Показываем уведомление об успехе
+      toast.success('Session created successfully', {
+        duration: 3000,
+        position: 'top-right',
       });
+
+      // Закрываем модальное окно и обновляем состояние
       setIsAddModalOpen(false);
       setCurrentMonth(new Date(selectedDate));
+      setForm({
+        clientId: '',
+        type: 'personal',
+        time: '',
+        note: '',
+      });
     } catch (err) {
-      alert('Failed to create session');
+      console.error('Failed to create session:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create session';
+      toast.error(errorMessage, {
+        duration: 5000,
+        position: 'top-right',
+      });
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: number) => {
+    try {
+      await deleteSession(sessionId);
+      toast.success('Session has been canceled');
+      setSessions(sessions => sessions.filter(s => s.id !== sessionId));
+    } catch (err) {
+      toast.error('Failed to cancel session');
       console.error(err);
     }
   };
@@ -112,13 +200,14 @@ export default function CalendarPage() {
             <h1 className="text-3xl font-bold text-[#1F2A44]">Calendar</h1>
             <p className="text-sm text-[#6B7280] mt-1">Manage your training sessions</p>
           </div>
-          <button
+          <Button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-[#10B981] text-white px-4 py-2 rounded-lg hover:bg-[#059669] transition-colors"
+            className="flex items-center gap-2 cursor-pointer"
+            variant="success"
           >
             <Plus className="h-5 w-5" />
             Add Session
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -137,6 +226,7 @@ export default function CalendarPage() {
                 hasSession: "border-b-4 border-[#8B5CF6] font-bold",
                 today: "border border-[#8B5CF6]",
               }}
+              disabled={{ before: new Date() }}
             />
           </div>
 
@@ -157,15 +247,16 @@ export default function CalendarPage() {
             {sessionsForSelectedDate.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-[#6B7280]">No sessions scheduled for this date</p>
-                <button
+                <Button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="mt-4 text-[#10B981] hover:text-[#059669] transition-colors"
+                  className="mt-4 cursor-pointer"
+                  variant="default"
                 >
                   Schedule a session
-                </button>
+                </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 {sessionsForSelectedDate.map((session) => (
                   <div
                     key={session.id}
@@ -174,14 +265,23 @@ export default function CalendarPage() {
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       <span>
-                        {session.client?.name || '—'}
+                        {getClientName(session)}
                       </span>
                       <span className="ml-2 px-2 py-0.5 rounded bg-gray-100 text-xs">{session.type}</span>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => handleDeleteSession(session.id)}
+                      >
+                        Cancel Session
+                      </Button>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-[#6B7280] mt-1">
                       <Clock className="h-4 w-4" />
                       <span>
-                        {new Date(session.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {getTimeFromDateString(session.date)}
                       </span>
                     </div>
                     {session.note && (
@@ -206,7 +306,7 @@ export default function CalendarPage() {
                 value={form.clientId}
                 onChange={handleFormChange}
                 required
-                className="w-full border rounded px-3 py-2"
+                className="w-full border rounded px-3 py-2 cursor-pointer"
               >
                 <option value="" disabled>Select client</option>
                 {clients.map(client => (
@@ -222,10 +322,10 @@ export default function CalendarPage() {
                 name="type"
                 value={form.type}
                 onChange={handleFormChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border rounded px-3 py-2 cursor-pointer"
               >
                 <option value="personal">Personal</option>
-                <option value="group">Group</option>
+                {/* <option value="group">Group</option> */}
                 <option value="consultation">Consultation</option>
               </select>
             </div>
@@ -237,6 +337,7 @@ export default function CalendarPage() {
                 onChange={handleFormChange}
                 options={timeOptions}
                 required
+                className="cursor-pointer"
               />
             </div>
             <div>
@@ -245,7 +346,7 @@ export default function CalendarPage() {
                 name="note"
                 value={form.note}
                 onChange={handleFormChange}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border rounded px-3 py-2 cursor-pointer"
                 rows={2}
                 placeholder="Optional note..."
               />

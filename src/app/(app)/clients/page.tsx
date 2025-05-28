@@ -7,6 +7,8 @@ import EditClientModal from '@/components/EditClientModal';
 import { Client } from '@/types/types';
 import { getClients, deleteClient } from '@/utils/api/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
 
 export default function ClientsPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -84,9 +86,10 @@ export default function ClientsPage() {
       await deleteClient(id);
       setClients(prev => prev.filter(client => client.id !== id));
       setFilteredClients(prev => prev.filter(client => client.id !== id));
+      toast.success('Client deleted successfully');
     } catch (err) {
       console.error('Error deleting client:', err);
-      alert('Error deleting client');
+      toast.error('Failed to delete client');
     }
   };
 
@@ -100,14 +103,15 @@ export default function ClientsPage() {
             <h1 className="text-3xl font-bold text-[#1F2A44] mb-2">Clients</h1>
             <p className="text-sm text-[#6B7280]">Manage your client list and details</p>
           </div>
-          <button
+          <Button
             type="button"
-            className="flex items-center gap-2 bg-[#10B981] text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-[#059669] transition-colors"
+            className="flex items-center gap-2 cursor-pointer"
+            variant="success"
             onClick={() => setIsOpen(true)}
           >
             <Plus className="h-5 w-5" />
             Add New Client
-          </button>
+          </Button>
         </div>
 
         {/* Поиск и фильтры */}
