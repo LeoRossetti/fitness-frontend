@@ -9,6 +9,23 @@ interface ClientCardProps {
   onEdit: (clientId: number) => void;
 }
 
+const formatNextSession = (dateString: string | undefined) => {
+  if (!dateString) return 'Not scheduled';
+  
+  // Извлекаем время из строки даты (формат: YYYY-MM-DDThh:mm:ss+hh:mm)
+  const match = dateString.match(/T(\d{2}:\d{2})/);
+  if (!match) return 'Invalid date format';
+  
+  // Извлекаем дату из строки
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  // Возвращаем отформатированную дату и время
+  return `${day}.${month}.${year}, ${match[1]}`;
+};
+
 export default function ClientCard({ client, onDelete, onEdit }: ClientCardProps) {
   const tag = client.plan === 'Single Session' ? 'Single Session' : 'Subscription';
 
@@ -39,7 +56,7 @@ export default function ClientCard({ client, onDelete, onEdit }: ClientCardProps
             </div>
             <div>
               <span className="text-xs font-medium">NEXT SESSION</span>
-              <p className="text-xs">{client.nextSession}</p>
+              <p className="text-xs">{formatNextSession(client.nextSession)}</p>
             </div>
           </div>
         </div>

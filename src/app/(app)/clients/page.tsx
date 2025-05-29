@@ -7,6 +7,8 @@ import EditClientModal from '@/components/EditClientModal';
 import { Client } from '@/types/types';
 import { getClients, deleteClient } from '@/utils/api/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
 
 export default function ClientsPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,6 +43,7 @@ export default function ClientsPage() {
     if (query) {
       const lowerQuery = query.toLowerCase();
       result = result.filter(client =>
+        
         client.User?.name?.toLowerCase().includes(lowerQuery) ||
         client.User?.email?.toLowerCase().includes(lowerQuery)
       );
@@ -80,12 +83,67 @@ export default function ClientsPage() {
 
   const handleDeleteClient = async (id: number) => {
     try {
+      // Сначала пробуем удалить клиента напрямую
+      try {
+        await deleteClient(id);
+        setClients(prev => prev.filter(client => client.id !== id));
+        setFilteredClients(prev => prev.filter(client => client.id !== id));
+        toast.success('Client has been deleted');
+        return;
+      } catch (deleteError) {
+        console.log('Direct client deletion failed, trying to delete sessions first');
+      }
+
+      // Если не получилось удалить клиента, пробуем найти сессии через календарь
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1;
+      
+      // Получаем сессии за текущий месяц
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions?month=${year}-${String(month).padStart(2, '0')}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch sessions:', response.status, response.statusText);
+        toast.error('Failed to delete client');
+        return;
+      }
+
+      const allSessions = await response.json();
+      
+      // Фильтруем сессии только для этого клиента
+      const clientSessions = allSessions.filter((session: any) => session.Client?.id === id);
+      
+      if (clientSessions.length > 0) {
+        // Удаляем каждую сессию клиента
+        const deletePromises = clientSessions.map((session: any) => 
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${session.id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          })
+        );
+
+        // Ждем удаления всех сессий
+        const deleteResults = await Promise.allSettled(deletePromises);
+        
+        // Проверяем, были ли ошибки при удалении сессий
+        const failedDeletes = deleteResults.filter(result => result.status === 'rejected');
+        if (failedDeletes.length > 0) {
+          console.error('Some sessions failed to delete:', failedDeletes);
+          toast.error('Failed to delete some sessions');
+          return;
+        }
+      }
+
+      // После успешного удаления всех сессий пробуем снова удалить клиента
       await deleteClient(id);
       setClients(prev => prev.filter(client => client.id !== id));
       setFilteredClients(prev => prev.filter(client => client.id !== id));
+      toast.success('Client and all their sessions have been deleted');
     } catch (err) {
       console.error('Error deleting client:', err);
-      alert('Error deleting client');
+      toast.error('Failed to delete client');
     }
   };
 
@@ -99,14 +157,15 @@ export default function ClientsPage() {
             <h1 className="text-3xl font-bold text-[#1F2A44] mb-2">Clients</h1>
             <p className="text-sm text-[#6B7280]">Manage your client list and details</p>
           </div>
-          <button
+          <Button
             type="button"
-            className="flex items-center gap-2 bg-[#10B981] text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-[#059669] transition-colors"
+            className="flex items-center gap-2 cursor-pointer"
+            variant="success"
             onClick={() => setIsOpen(true)}
           >
             <Plus className="h-5 w-5" />
             Add New Client
-          </button>
+          </Button>
         </div>
 
         {/* Поиск и фильтры */}

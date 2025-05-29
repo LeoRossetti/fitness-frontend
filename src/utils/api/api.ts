@@ -44,3 +44,93 @@ export const getClientById = async (id: number) => {
   }
   return response.json();
 };
+
+export const getSessionsByDate = async (date: string) => {
+  const response = await fetch(`${API_URL}/api/sessions?date=${date}`, {
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Failed to fetch sessions');
+  return response.json();
+};
+
+export const createSession = async (data: {
+  clientId: number;
+  type: string;
+  time: string;
+  note: string;
+  date: string;
+}) => {
+  try {
+    const response = await fetch(`${API_URL}/api/sessions`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      console.error('Server response:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(`Failed to create session: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error creating session:', error);
+    throw error;
+  }
+};
+
+export const getSessionsByMonth = async (year: number, month: number) => {
+  const monthStr = String(month).padStart(2, '0');
+  const response = await fetch(`${API_URL}/api/sessions?month=${year}-${monthStr}`, {
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Failed to fetch sessions');
+  return response.json();
+};
+
+export const deleteSession = async (id: number) => {
+  try {
+    console.log('Attempting to delete session with ID:', id);
+    const response = await fetch(`${API_URL}/api/sessions/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      console.error('Failed to delete session:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(`Failed to delete session: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error in deleteSession:', error);
+    throw error;
+  }
+};
+
+export const updateClientNextSession = async (clientId: number, nextSession: string | null) => {
+  const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ nextSession }),
+  });
+  if (!response.ok) throw new Error('Failed to update client next session');
+  return response.json();
+};
