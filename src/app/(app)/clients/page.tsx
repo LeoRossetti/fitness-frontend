@@ -99,11 +99,6 @@ export default function ClientsPage() {
     }
   };
 
-  const handleError = (error: unknown) => {
-    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-    toast.error(errorMessage);
-  };
-
   if (loading) return <p>Loading...</p>;
 
   return (
