@@ -98,9 +98,39 @@ export const getSessionsByMonth = async (year: number, month: number) => {
 };
 
 export const deleteSession = async (id: number) => {
-  const response = await fetch(`${API_URL}/api/sessions/${id}`, {
-    method: 'DELETE',
+  try {
+    console.log('Attempting to delete session with ID:', id);
+    const response = await fetch(`${API_URL}/api/sessions/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      console.error('Failed to delete session:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+      throw new Error(`Failed to delete session: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error in deleteSession:', error);
+    throw error;
+  }
+};
+
+export const updateClientNextSession = async (clientId: number, nextSession: string | null) => {
+  const response = await fetch(`${API_URL}/api/clients/${clientId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     credentials: 'include',
+    body: JSON.stringify({ nextSession }),
   });
-  if (!response.ok) throw new Error('Failed to delete session');
+  if (!response.ok) throw new Error('Failed to update client next session');
+  return response.json();
 };

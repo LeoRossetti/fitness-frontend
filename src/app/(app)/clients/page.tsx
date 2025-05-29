@@ -83,10 +83,64 @@ export default function ClientsPage() {
 
   const handleDeleteClient = async (id: number) => {
     try {
+      // Сначала пробуем удалить клиента напрямую
+      try {
+        await deleteClient(id);
+        setClients(prev => prev.filter(client => client.id !== id));
+        setFilteredClients(prev => prev.filter(client => client.id !== id));
+        toast.success('Client has been deleted');
+        return;
+      } catch (deleteError) {
+        console.log('Direct client deletion failed, trying to delete sessions first');
+      }
+
+      // Если не получилось удалить клиента, пробуем найти сессии через календарь
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1;
+      
+      // Получаем сессии за текущий месяц
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions?month=${year}-${String(month).padStart(2, '0')}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch sessions:', response.status, response.statusText);
+        toast.error('Failed to delete client');
+        return;
+      }
+
+      const allSessions = await response.json();
+      
+      // Фильтруем сессии только для этого клиента
+      const clientSessions = allSessions.filter((session: any) => session.Client?.id === id);
+      
+      if (clientSessions.length > 0) {
+        // Удаляем каждую сессию клиента
+        const deletePromises = clientSessions.map((session: any) => 
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${session.id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          })
+        );
+
+        // Ждем удаления всех сессий
+        const deleteResults = await Promise.allSettled(deletePromises);
+        
+        // Проверяем, были ли ошибки при удалении сессий
+        const failedDeletes = deleteResults.filter(result => result.status === 'rejected');
+        if (failedDeletes.length > 0) {
+          console.error('Some sessions failed to delete:', failedDeletes);
+          toast.error('Failed to delete some sessions');
+          return;
+        }
+      }
+
+      // После успешного удаления всех сессий пробуем снова удалить клиента
       await deleteClient(id);
       setClients(prev => prev.filter(client => client.id !== id));
       setFilteredClients(prev => prev.filter(client => client.id !== id));
-      toast.success('Client deleted successfully');
+      toast.success('Client and all their sessions have been deleted');
     } catch (err) {
       console.error('Error deleting client:', err);
       toast.error('Failed to delete client');

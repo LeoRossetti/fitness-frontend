@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { Plus, Clock, User, Calendar as CalendarIcon } from 'lucide-react';
-import { getClients, createSession, getSessionsByMonth, deleteSession } from '@/utils/api/api';
+import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession } from '@/utils/api/api';
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,12 @@ interface Session {
   date: string;
   time: string;
   note: string;
-  client: { id: number; name: string };
+  Client: {
+    id: number;
+    User: {
+      name: string;
+    };
+  };
   type: 'personal' | 'group' | 'consultation';
 }
 
@@ -93,10 +98,8 @@ export default function CalendarPage() {
   };
 
   // Вспомогательная функция для получения имени клиента
-  const getClientName = (session: any) => {
-    return session.Client && session.Client.User && session.Client.User.name
-      ? session.Client.User.name
-      : '—';
+  const getClientName = (session: Session) => {
+    return session.Client?.User?.name || '—';
   };
 
   // Генерируем опции времени с шагом 15 минут с 07:00 до 22:00
@@ -183,12 +186,33 @@ export default function CalendarPage() {
 
   const handleDeleteSession = async (sessionId: number) => {
     try {
+      console.log('Starting session deletion process for ID:', sessionId);
+      
+      const session = sessions.find(s => s.id === sessionId);
+      if (!session) {
+        console.error('Session not found in local state:', sessionId);
+        toast.error('Session not found');
+        return;
+      }
+
+      const clientId = session.Client?.id;
+      if (!clientId) {
+        console.error('Client ID not found in session:', session);
+        toast.error('Client information not found');
+        return;
+      }
+
+      console.log('Deleting session and updating client:', { sessionId, clientId });
+      
       await deleteSession(sessionId);
+      await updateClientNextSession(clientId, null);
+      
       toast.success('Session has been canceled');
       setSessions(sessions => sessions.filter(s => s.id !== sessionId));
     } catch (err) {
-      toast.error('Failed to cancel session');
-      console.error(err);
+      console.error('Error in handleDeleteSession:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel session';
+      toast.error(errorMessage);
     }
   };
 
