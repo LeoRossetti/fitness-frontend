@@ -22,6 +22,9 @@ export default function ClientsPage() {
 
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+
   const fetchClients = async () => {
     try {
       const data = await getClients();
@@ -81,70 +84,24 @@ export default function ClientsPage() {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const handleDeleteClient = async (id: number) => {
+  const handleDeleteClient = async () => {
+    if (!clientToDelete) return;
+
     try {
-      // Сначала пробуем удалить клиента напрямую
-      try {
-        await deleteClient(id);
-        setClients(prev => prev.filter(client => client.id !== id));
-        setFilteredClients(prev => prev.filter(client => client.id !== id));
-        toast.success('Client has been deleted');
-        return;
-      } catch (deleteError) {
-        console.log('Direct client deletion failed, trying to delete sessions first');
-      }
-
-      // Если не получилось удалить клиента, пробуем найти сессии через календарь
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth() + 1;
-      
-      // Получаем сессии за текущий месяц
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions?month=${year}-${String(month).padStart(2, '0')}`, {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        console.error('Failed to fetch sessions:', response.status, response.statusText);
-        toast.error('Failed to delete client');
-        return;
-      }
-
-      const allSessions = await response.json();
-      
-      // Фильтруем сессии только для этого клиента
-      const clientSessions = allSessions.filter((session: any) => session.Client?.id === id);
-      
-      if (clientSessions.length > 0) {
-        // Удаляем каждую сессию клиента
-        const deletePromises = clientSessions.map((session: any) => 
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sessions/${session.id}`, {
-            method: 'DELETE',
-            credentials: 'include',
-          })
-        );
-
-        // Ждем удаления всех сессий
-        const deleteResults = await Promise.allSettled(deletePromises);
-        
-        // Проверяем, были ли ошибки при удалении сессий
-        const failedDeletes = deleteResults.filter(result => result.status === 'rejected');
-        if (failedDeletes.length > 0) {
-          console.error('Some sessions failed to delete:', failedDeletes);
-          toast.error('Failed to delete some sessions');
-          return;
-        }
-      }
-
-      // После успешного удаления всех сессий пробуем снова удалить клиента
-      await deleteClient(id);
-      setClients(prev => prev.filter(client => client.id !== id));
-      setFilteredClients(prev => prev.filter(client => client.id !== id));
-      toast.success('Client and all their sessions have been deleted');
-    } catch (err) {
-      console.error('Error deleting client:', err);
-      toast.error('Failed to delete client');
+      await deleteClient(clientToDelete.id);
+      toast.success('Client deleted successfully');
+      setIsDeleteModalOpen(false);
+      setClientToDelete(null);
+      setClients(clients.filter(client => client.id !== clientToDelete.id));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete client';
+      toast.error(errorMessage);
     }
+  };
+
+  const handleError = (error: unknown) => {
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+    toast.error(errorMessage);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -212,7 +169,10 @@ export default function ClientsPage() {
             <ClientCard
               key={client.id}
               client={client}
-              onDelete={() => handleDeleteClient(client.id)}
+              onDelete={() => {
+                setIsDeleteModalOpen(true);
+                setClientToDelete(client);
+              }}
               onEdit={(id) => setEditingClientId(id)}
             />
           ))}
@@ -233,6 +193,31 @@ export default function ClientsPage() {
           onClose={() => setEditingClientId(null)}
           onUpdated={() => setRefreshTrigger(prev => prev + 1)}
         />
+      )}
+
+      {/* Модалка удаления клиента */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">Are you sure you want to delete this client?</h2>
+            <div className="flex justify-end gap-4">
+              <Button
+                type="button"
+                variant="danger"
+                onClick={handleDeleteClient}
+              >
+                Delete
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

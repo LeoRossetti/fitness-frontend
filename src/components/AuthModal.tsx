@@ -149,12 +149,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           >
             {isLogin ? (
               <>
-                Don't have an account?{" "}
+                Don&apos;t have an account?{' '}
                 <span className="text-main hover:text-main-dark cursor-pointer">Sign Up</span>
               </>
             ) : (
               <>
-                Already have an account?{" "}
+                Already have an account?{' '}
                 <span className="text-main hover:text-main-dark cursor-pointer">Sign In</span>
               </>
             )}

@@ -67,19 +67,6 @@ export default function CalendarPage() {
     }
   }, [isAddModalOpen]);
 
-  const getSessionTypeColor = (type: Session['type']) => {
-    switch (type) {
-      case 'personal':
-        return 'bg-blue-100 text-blue-800';
-      case 'group':
-        return 'bg-purple-100 text-purple-800';
-      case 'consultation':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   // Обработчик изменения полей формы
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | { name: string, value: string }
