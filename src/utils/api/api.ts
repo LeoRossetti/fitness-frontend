@@ -134,3 +134,50 @@ export const updateClientNextSession = async (clientId: number, nextSession: str
   if (!response.ok) throw new Error('Failed to update client next session');
   return response.json();
 };
+
+export const getExercises = async () => {
+  const response = await fetch(`${API_URL}/api/exercises`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch exercises');
+  }
+
+  return response.json();
+};
+
+export const createExercise = async (data: {
+  name: string;
+  description: string;
+  category: string;
+  muscleGroup: string;
+}) => {
+  const response = await fetch(`${API_URL}/api/exercises`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to create exercise');
+  return response.json();
+};
+
+export const createWorkoutTemplate = async (name: string, exercises: any[]) => {
+  const response = await fetch(`${API_URL}/api/workout-templates`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ name, exercises }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to save workout template');
+  }
+  return response.json();
+};

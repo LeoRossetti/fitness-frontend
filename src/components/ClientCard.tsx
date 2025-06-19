@@ -12,18 +12,43 @@ interface ClientCardProps {
 const formatNextSession = (dateString: string | undefined) => {
   if (!dateString) return 'Not scheduled';
   
-  // Извлекаем время из строки даты (формат: YYYY-MM-DDThh:mm:ss+hh:mm)
-  const match = dateString.match(/T(\d{2}:\d{2})/);
-  if (!match) return 'Invalid date format';
+  console.log('Raw date string:', dateString);
   
-  // Извлекаем дату из строки
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  
-  // Возвращаем отформатированную дату и время
-  return `${day}.${month}.${year}, ${match[1]}`;
+  try {
+    // Создаем объект даты
+    const date = new Date(dateString);
+    console.log('Parsed date:', date);
+    
+    // Проверяем валидность даты
+    if (isNaN(date.getTime())) {
+      console.log('Invalid date:', dateString);
+      return 'Invalid date format';
+    }
+    
+    // Используем Intl.DateTimeFormat для форматирования даты и времени
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'UTC' // Используем UTC для предотвращения проблем с часовыми поясами
+    });
+    
+    // Форматируем дату и время
+    const formattedDate = formatter.format(date);
+    console.log('Formatted date:', formattedDate);
+    
+    // Преобразуем формат из MM/DD/YYYY, HH:mm в YYYY-MM-DD, HH:mm
+    const [datePart, timePart] = formattedDate.split(', ');
+    const [month, day, year] = datePart.split('/');
+    
+    return `${year}-${month}-${day}, ${timePart}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid date format';
+  }
 };
 
 export default function ClientCard({ client, onDelete, onEdit }: ClientCardProps) {

@@ -6,7 +6,13 @@ import LayoutWithSidebar from '@/components/LayoutWithSidebar';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <LayoutWithSidebar>{children}</LayoutWithSidebar>
+      <LayoutWithSidebar>
+        <div className="min-h-screen bg-background-light">
+          <div className="container mx-auto px-4 py-6">
+            {children}
+          </div>
+        </div>
+      </LayoutWithSidebar>
     </SidebarProvider>
   );
 }

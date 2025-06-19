@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Dumbbell, LayoutDashboard, Users, BarChart2, Calendar, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { Dumbbell, LayoutDashboard, Users, BarChart2, Calendar, ChevronLeft, ChevronRight, Menu, FileText } from 'lucide-react';
 import { useContext, useState } from 'react';
 import { SidebarContext } from './SidebarProvider';
 
@@ -62,6 +62,13 @@ export default function Sidebar() {
             icon={<Dumbbell size={20} />}
             label="Workouts"
             active={pathname === '/workouts'}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            href="/workout_templates"
+            icon={<FileText size={20} />}
+            label="Templates"
+            active={pathname === '/workout_templates'}
             collapsed={collapsed}
           />
           <SidebarItem

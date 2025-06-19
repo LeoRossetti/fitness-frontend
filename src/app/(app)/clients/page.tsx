@@ -9,6 +9,8 @@ import { getClients, deleteClient } from '@/utils/api/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
 
 export default function ClientsPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +23,8 @@ export default function ClientsPage() {
   const [filter, setFilter] = useState<'All' | 'Subscription' | 'Single Session'>('All');
 
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
+
+  const router = useRouter();
 
   const fetchClients = async () => {
     try {
@@ -147,11 +151,21 @@ export default function ClientsPage() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  const handleEdit = (clientId: number) => {
+    router.push(`/clients/${clientId}/edit`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-main"></div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-white px-4 py-12">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-[#1F2A44] mb-2">Clients</h1>
@@ -171,12 +185,12 @@ export default function ClientsPage() {
         {/* Поиск и фильтры */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
-            <input
+            <Input
               type="text"
               placeholder="Search clients..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+              className="pl-10"
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#6B7280]" />
           </div>
@@ -213,7 +227,7 @@ export default function ClientsPage() {
               key={client.id}
               client={client}
               onDelete={() => handleDeleteClient(client.id)}
-              onEdit={(id) => setEditingClientId(id)}
+              onEdit={() => handleEdit(client.id)}
             />
           ))}
         </div>
