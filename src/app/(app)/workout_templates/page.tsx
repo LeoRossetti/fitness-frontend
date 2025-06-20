@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { Search, Plus, Dumbbell, Calendar, Target, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getWorkoutTemplates } from '@/lib/api';
+import { getWorkoutTemplates, deleteWorkoutTemplate } from '@/lib/api';
+import WorkoutTemplateCard from '@/components/workouts/WorkoutTemplateCard';
+import EditWorkoutTemplateModal from '@/components/workouts/EditWorkoutTemplateModal';
 import toast from 'react-hot-toast';
 import { ServerWorkoutTemplate } from '@/types/types';
 
@@ -14,6 +16,7 @@ export default function WorkoutTemplatesPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'All' | 'Strength' | 'Cardio' | 'Flexibility' | 'Bodyweight'>('All');
+  const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null);
 
   const fetchTemplates = async () => {
     try {
@@ -73,6 +76,30 @@ export default function WorkoutTemplatesPage() {
     setSearchQuery('');
     setFilter('All');
     applyFilters('', 'All');
+  };
+
+  const handleEdit = (templateId: number) => {
+    setEditingTemplateId(templateId);
+  };
+
+  const handleDelete = async (templateId: number) => {
+    if (!confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteWorkoutTemplate(templateId);
+      setTemplates(prev => prev.filter(template => template.id !== templateId));
+      setFilteredTemplates(prev => prev.filter(template => template.id !== templateId));
+      toast.success('Template deleted successfully');
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      toast.error('Failed to delete template');
+    }
+  };
+
+  const handleTemplateUpdated = () => {
+    fetchTemplates(); // Перезагружаем список после обновления
   };
 
   if (loading) {
@@ -148,48 +175,12 @@ export default function WorkoutTemplatesPage() {
         {/* Список шаблонов */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {templatesToRender.map(template => (
-            <div key={template.id} className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold text-[#1F2A44]">{template.name}</h3>
-                <span className="text-xs text-[#6B7280]">
-                  {template.Exercises.length} exercises
-                </span>
-              </div>
-              
-              {template.Exercises.length > 0 && (
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {Array.from(new Set(template.Exercises.map(ex => ex.Exercise.category))).map(category => (
-                      <span key={category} className={`text-xs px-2 py-1 rounded-full ${
-                        category === 'Strength' ? 'bg-[#8B5CF6] text-white' :
-                        category === 'Cardio' ? 'bg-[#10B981] text-white' :
-                        category === 'Bodyweight' ? 'bg-[#F59E0B] text-white' :
-                        'bg-gray-200 text-[#1F2A44]'
-                      }`}>
-                        {category}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="space-y-1">
-                    {template.Exercises.slice(0, 3).map((exercise, index) => (
-                      <div key={index} className="text-xs text-[#6B7280] flex justify-between">
-                        <span>{exercise.Exercise.name}</span>
-                        <span>{exercise.sets}×{exercise.reps}</span>
-                      </div>
-                    ))}
-                    {template.Exercises.length > 3 && (
-                      <div className="text-xs text-[#6B7280] italic">
-                        +{template.Exercises.length - 3} more exercises
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="text-xs text-[#6B7280]">
-                Created: {template.createdAt ? new Date(template.createdAt).toLocaleDateString() : 'Unknown date'}
-              </div>
-            </div>
+            <WorkoutTemplateCard
+              key={template.id}
+              template={template}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
 
@@ -201,6 +192,15 @@ export default function WorkoutTemplatesPage() {
           </div>
         )}
       </div>
+
+      {/* Модалка редактирования шаблона */}
+      {editingTemplateId !== null && (
+        <EditWorkoutTemplateModal
+          templateId={editingTemplateId}
+          onClose={() => setEditingTemplateId(null)}
+          onUpdated={handleTemplateUpdated}
+        />
+      )}
     </main>
   );
 } 

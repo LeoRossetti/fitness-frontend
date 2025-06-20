@@ -114,9 +114,21 @@ export const createExercise = (data: CreateExerciseData): Promise<Exercise> =>
 // ---------------------------------------------------------------------------------------WORKOUT TEMPLATES------------------------------------------------------------------------------------------------
 export const getWorkoutTemplates = (): Promise<{ templates: ServerWorkoutTemplate[] }> => makeRequest('workout-templates');
 
+export const getWorkoutTemplateById = (id: number): Promise<ServerWorkoutTemplate> => 
+  makeRequest(`workout-templates/${id}`);
+
 export const createWorkoutTemplate = (data: CreateWorkoutTemplateData): Promise<WorkoutTemplate> => 
   makeRequest('workout-templates', {
     method: 'POST',
     body: JSON.stringify(data)
   });
+
+export const updateWorkoutTemplate = (id: number, data: any): Promise<ServerWorkoutTemplate> => 
+  makeRequest(`workout-templates/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  });
+
+export const deleteWorkoutTemplate = (id: number): Promise<void> => 
+  makeRequest(`workout-templates/${id}`, { method: 'DELETE' });
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
