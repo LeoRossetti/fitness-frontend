@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Dumbbell, LayoutDashboard, Users, BarChart2, Calendar, ChevronLeft, ChevronRight, Menu, FileText } from 'lucide-react';
 import { useContext, useState } from 'react';
-import { SidebarContext } from './SidebarProvider';
+import { SidebarContext } from '@/components/layout/SidebarProvider';
 
 export default function Sidebar() {
   const pathname = usePathname();

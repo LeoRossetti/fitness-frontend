@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getExercises } from "@/utils/api/api";
+import { getExercises } from "@/lib/api";
 import { Search } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 
@@ -30,8 +30,17 @@ export default function ExerciseLibrary({ onSelectExercise }: ExerciseLibraryPro
     const fetchExercises = async () => {
       try {
         const data = await getExercises();
-        setExercises(data.exercises);
-        setFilteredExercises(data.exercises);
+        
+        // Сервер возвращает объект с полем exercises
+        const exercisesArray = data.exercises || [];
+        
+        if (Array.isArray(exercisesArray)) {
+          setExercises(exercisesArray);
+          setFilteredExercises(exercisesArray);
+        } else {
+          console.error('Expected array but got:', typeof exercisesArray, exercisesArray);
+          setError('Invalid data format received from server');
+        }
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -108,7 +117,7 @@ export default function ExerciseLibrary({ onSelectExercise }: ExerciseLibraryPro
 
       {/* Exercise list */}
       <div className="space-y-3 max-h-[500px] overflow-y-auto">
-        {filteredExercises.map((ex) => (
+        {Array.isArray(filteredExercises) && filteredExercises.map((ex) => (
           <div
             key={ex.id}
             className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 group border border-gray-100 hover:border-gray-200"

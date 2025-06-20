@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useContext } from 'react';
 import { Dumbbell } from 'lucide-react';
-import { SidebarContext } from './SidebarProvider'; // импортируем контекст
+import { SidebarContext } from '@/components/layout/SidebarProvider'; // импортируем контекст
 
 export default function DashboardHeader() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);

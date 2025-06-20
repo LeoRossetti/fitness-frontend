@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Modal } from './ui/modal';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/ui/modal';
 import toast from 'react-hot-toast';
 
 interface AuthModalProps {

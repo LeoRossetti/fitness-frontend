@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { Plus, Clock, User, Calendar as CalendarIcon } from 'lucide-react';
-import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession } from '@/utils/api/api';
+import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession } from '@/lib/api';
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';

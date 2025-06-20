@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import ClientCard from '@/components/ClientCard';
-import AddClientModal from '@/components/AddClientModal';
-import EditClientModal from '@/components/EditClientModal';
+import ClientCard from '@/components/clients/ClientCard';
+import AddClientModal from '@/components/clients/AddClientModal';
+import EditClientModal from '@/components/clients/EditClientModal';
 import { Client } from '@/types/types';
-import { getClients, deleteClient } from '@/utils/api/api';
+import { getClients, deleteClient } from '@/lib/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 
 export default function ClientsPage() {
@@ -23,8 +22,6 @@ export default function ClientsPage() {
   const [filter, setFilter] = useState<'All' | 'Subscription' | 'Single Session'>('All');
 
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
-
-  const router = useRouter();
 
   const fetchClients = async () => {
     try {
@@ -152,7 +149,7 @@ export default function ClientsPage() {
   };
 
   const handleEdit = (clientId: number) => {
-    router.push(`/clients/${clientId}/edit`);
+    setEditingClientId(clientId);
   };
 
   if (loading) {

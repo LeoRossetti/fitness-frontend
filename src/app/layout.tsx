@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./styles/globals.css";
 import "./styles/animations.css";
-import { ClientLayout } from "@/components/layout/client-layout";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -23,9 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body>
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+        {children}
         <Toaster position="top-right" />
       </body>
     </html>
