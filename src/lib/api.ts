@@ -132,7 +132,7 @@ export const createWorkoutTemplate = (data: CreateWorkoutTemplateData): Promise<
     body: JSON.stringify(data)
   });
 
-export const updateWorkoutTemplate = (id: number, data: any): Promise<ServerWorkoutTemplate> => 
+export const updateWorkoutTemplate = (id: number, data: CreateWorkoutTemplateData): Promise<ServerWorkoutTemplate> => 
   makeRequest(`workout-templates/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data)

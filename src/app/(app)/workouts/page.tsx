@@ -20,8 +20,6 @@ interface WorkoutExercise extends Exercise {
   notes?: string;
 }
 
-const categories = ["All", "Strength", "Cardio", "Flexibility", "Balance", "Core"];
-
 // Ключи для localStorage
 const DRAFT_KEY = 'workout-draft';
 const DRAFT_NAME_KEY = 'workout-draft-name';

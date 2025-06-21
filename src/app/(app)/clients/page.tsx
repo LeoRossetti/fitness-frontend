@@ -100,10 +100,6 @@ export default function ClientsPage() {
     }
   };
 
-  const handleEdit = (clientId: number) => {
-    setEditingClientId(clientId);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -205,7 +201,7 @@ export default function ClientsPage() {
                   setIsDeleteModalOpen(true);
                   setClientToDelete(client);
                 }}
-                onEdit={(id) => setEditingClientId(id)}
+                onEdit={() => setEditingClientId(client.id)}
               />
             ))
           )}

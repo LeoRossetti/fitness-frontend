@@ -43,8 +43,8 @@ export default function ExerciseLibrary({ onSelectExercise }: ExerciseLibraryPro
         console.error('Expected array but got:', typeof exercisesArray, exercisesArray);
         setError('Invalid data format received from server');
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getWorkoutTemplateById, updateWorkoutTemplate } from "@/lib/api";
-import { ServerWorkoutTemplate, Exercise } from "@/types/types";
+import { ServerWorkoutTemplate, Exercise, ServerWorkoutExercise } from "@/types/types";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
@@ -60,7 +60,7 @@ export default function EditWorkoutTemplateModal({ templateId, onClose, onUpdate
         console.log('Template data received:', response);
         
         // Сервер возвращает объект с полем template
-        const data = (response as any).template || response;
+        const data: ServerWorkoutTemplate = (response as { template?: ServerWorkoutTemplate }).template || (response as ServerWorkoutTemplate);
         console.log('Template data:', data);
         console.log('Exercises from server:', data.Exercises);
         
@@ -76,7 +76,7 @@ export default function EditWorkoutTemplateModal({ templateId, onClose, onUpdate
         
         setFormData({
           name: data.name || '',
-          exercises: data.Exercises.map((ex: any) => ({
+          exercises: data.Exercises.map((ex: ServerWorkoutExercise) => ({
             exerciseId: ex.exerciseId,
             sets: ex.sets,
             reps: ex.reps,

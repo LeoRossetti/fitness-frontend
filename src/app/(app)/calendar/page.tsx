@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { Plus, Clock, User, Calendar as CalendarIcon } from 'lucide-react';
 import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession } from '@/lib/api';
+import { Session } from '@/types/types';
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
@@ -11,21 +12,7 @@ import { isSameDay } from 'date-fns';
 import { Select } from '@/components/ui/select';
 import { toast } from 'react-hot-toast';
 
-interface Session {
-  id: number;
-  date: string;
-  time: string;
-  note: string;
-  Client: {
-    id: number;
-    User: {
-      name: string;
-    };
-  };
-  type: 'personal' | 'group' | 'consultation';
-}
-
-export default function CalendarPage() {
+function CalendarPageContent() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -86,7 +73,7 @@ export default function CalendarPage() {
 
   // Вспомогательная функция для получения имени клиента
   const getClientName = (session: Session) => {
-    return session.Client?.User?.name || '—';
+    return session.client?.User?.name || '—';
   };
 
   // Генерируем опции времени с шагом 15 минут с 07:00 до 22:00
@@ -182,7 +169,7 @@ export default function CalendarPage() {
         return;
       }
 
-      const clientId = session.Client?.id;
+      const clientId = session.client?.id;
       if (!clientId) {
         console.error('Client ID not found in session:', session);
         toast.error('Client information not found');
@@ -374,5 +361,13 @@ export default function CalendarPage() {
         </Modal>
       )}
     </div>
+  );
+}
+
+export default function CalendarPage() {
+  return (
+    <Suspense fallback={<div>Loading calendar...</div>}>
+      <CalendarPageContent />
+    </Suspense>
   );
 }
