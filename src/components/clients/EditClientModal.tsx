@@ -1,19 +1,22 @@
-'use client';
+// src/components/EditClientModal.tsx
+"use client";
 
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Modal } from './ui/modal';
+import { useEffect, useState } from "react";
+import { getClientById, updateClient } from "@/lib/api";
+import { Client } from "@/types/types";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/ui/modal';
 import toast from 'react-hot-toast';
 
-interface AddClientModalProps {
-  isOpen: boolean;
+type Props = {
+  clientId: number;
   onClose: () => void;
-  onClientAdded?: () => void;
-}
+  onUpdated?: (client: Client) => void;
+};
 
-export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModalProps) {
-  const [loading, setLoading] = useState(false);
+export default function EditClientModal({ clientId, onClose, onUpdated }: Props) {
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,32 +29,35 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
     nextSession: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clients`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        onClose();
-        onClientAdded?.();
-        toast.success('Client added successfully');
-      } else {
-        toast.error('Failed to add client');
+  useEffect(() => {
+    const fetchClient = async () => {
+      try {
+        console.log('Fetching client with ID:', clientId);
+        const data = await getClientById(clientId);
+        console.log('Client data received:', data);
+        setFormData({
+          name: data.User?.name || '',
+          email: data.User?.email || '',
+          phone: data.phone || '',
+          goal: data.goal || '',
+          address: data.address || '',
+          notes: data.notes || '',
+          plan: data.plan || 'Premium Monthly',
+          type: data.type || 'Subscription',
+          nextSession: data.nextSession || '',
+        });
+      } catch (error) {
+        console.error("Failed to fetch client:", error);
+        console.error("Error details:", {
+          clientId,
+          error: error instanceof Error ? error.message : error
+        });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error adding client:', error);
-      toast.error('An error occurred while adding the client');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchClient();
+  }, [clientId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData((prev) => ({
@@ -60,8 +66,50 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
     }));
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Структурируем данные правильно для API
+      const updateData = {
+        User: {
+          name: formData.name,
+          email: formData.email
+        },
+        phone: formData.phone,
+        goal: formData.goal,
+        address: formData.address,
+        notes: formData.notes,
+        plan: formData.plan,
+        type: formData.type,
+        nextSession: formData.nextSession || null
+      };
+
+      console.log('Sending update data:', updateData);
+      const updatedClient = await updateClient(clientId, updateData);
+      console.log('Client updated successfully:', updatedClient);
+      
+      onUpdated?.(updatedClient);
+      onClose();
+      toast.success('Client updated successfully');
+    } catch (error) {
+      console.error('Error updating client:', error);
+      console.error('Error details:', {
+        clientId,
+        formData,
+        error: error instanceof Error ? error.message : error
+      });
+      toast.error('An error occurred while updating the client');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading && !formData.name) return <div>Loading...</div>;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Client">
+    <Modal isOpen={true} onClose={onClose} title="Edit Client">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -184,25 +232,25 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
           <label htmlFor="nextSession" className="block text-sm font-medium text-gray-700">
             Next Session
           </label>
-          <input
+          <Input
             id="nextSession"
             name="nextSession"
-            type="datetime-local"
+            type="text"
             value={formData.nextSession}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
-            placeholder="Select date and time"
+            className="mt-1"
+            placeholder="e.g., Today, 10:00 AM"
           />
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 pt-4">
           <Button type="button" variant="danger" className="flex-1" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" className="flex-1" disabled={loading}>
-            {loading ? 'Adding...' : 'Add Client'}
+            {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </form>
     </Modal>
   );
-} 
+}

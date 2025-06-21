@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
 import { Plus, Clock, User, Calendar as CalendarIcon } from 'lucide-react';
-import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession } from '@/utils/api/api';
+import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession } from '@/lib/api';
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
@@ -204,8 +204,8 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-[#1F2A44]">Calendar</h1>
@@ -363,7 +363,7 @@ export default function CalendarPage() {
               />
             </div>
             <div className="flex justify-end gap-2 mt-6">
-              <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
+              <Button type="button" variant="danger" onClick={() => setIsAddModalOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">

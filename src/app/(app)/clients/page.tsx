@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import ClientCard from '@/components/ClientCard';
-import AddClientModal from '@/components/AddClientModal';
-import EditClientModal from '@/components/EditClientModal';
+import ClientCard from '@/components/clients/ClientCard';
+import AddClientModal from '@/components/clients/AddClientModal';
+import EditClientModal from '@/components/clients/EditClientModal';
 import { Client } from '@/types/types';
-import { getClients, deleteClient } from '@/utils/api/api';
+import { getClients, deleteClient } from '@/lib/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function ClientsPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -99,11 +100,21 @@ export default function ClientsPage() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  const handleEdit = (clientId: number) => {
+    setEditingClientId(clientId);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-main"></div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-white px-4 py-12">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-[#1F2A44] mb-2">Clients</h1>
@@ -123,12 +134,12 @@ export default function ClientsPage() {
         {/* Поиск и фильтры */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
-            <input
+            <Input
               type="text"
               placeholder="Search clients..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+              className="pl-10"
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#6B7280]" />
           </div>
@@ -159,18 +170,45 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        <div className="divide-y divide-gray-200">
-          {filteredClients.map(client => (
-            <ClientCard
-              key={client.id}
-              client={client}
-              onDelete={() => {
-                setIsDeleteModalOpen(true);
-                setClientToDelete(client);
-              }}
-              onEdit={(id) => setEditingClientId(id)}
-            />
-          ))}
+        <div className="space-y-4">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchQuery || filter !== 'All' ? 'No clients found' : 'No clients yet'}
+              </h3>
+              <p className="text-gray-500 mb-6">
+                {searchQuery || filter !== 'All' 
+                  ? 'Try adjusting your search or filter criteria'
+                  : 'Get started by adding your first client'
+                }
+              </p>
+              {!searchQuery && filter === 'All' && (
+                <Button
+                  onClick={() => setIsOpen(true)}
+                  variant="success"
+                  className="flex items-center gap-2 mx-auto"
+                >
+                  <Plus className="h-5 w-5" />
+                  Add Your First Client
+                </Button>
+              )}
+            </div>
+          ) : (
+            filteredClients.map(client => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                onDelete={() => {
+                  setIsDeleteModalOpen(true);
+                  setClientToDelete(client);
+                }}
+                onEdit={(id) => setEditingClientId(id)}
+              />
+            ))
+          )}
         </div>
       </div>
 
@@ -184,7 +222,7 @@ export default function ClientsPage() {
       {/* Модалка редактирования клиента */}
       {editingClientId !== null && (
         <EditClientModal
-          clientId={editingClientId}
+          clientId={editingClientId!}
           onClose={() => setEditingClientId(null)}
           onUpdated={() => setRefreshTrigger(prev => prev + 1)}
         />

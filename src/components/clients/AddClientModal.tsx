@@ -1,22 +1,19 @@
-// src/components/EditClientModal.tsx
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { getClientById } from "@/utils/api/api";
-import { Client } from "@/types/types";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Modal } from "./ui/modal";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/ui/modal';
 import toast from 'react-hot-toast';
 
-type Props = {
-  clientId: number;
+interface AddClientModalProps {
+  isOpen: boolean;
   onClose: () => void;
-  onUpdated?: (client: Client) => void;
-};
+  onClientAdded?: () => void;
+}
 
-export default function EditClientModal({ clientId, onClose, onUpdated }: Props) {
-  const [loading, setLoading] = useState(true);
+export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddClientModalProps) {
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,29 +26,32 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     nextSession: '',
   });
 
-  useEffect(() => {
-    const fetchClient = async () => {
-      try {
-        const data = await getClientById(clientId);
-        setFormData({
-          name: data.User?.name || '',
-          email: data.User?.email || '',
-          phone: data.phone || '',
-          goal: data.goal || '',
-          address: data.address || '',
-          notes: data.notes || '',
-          plan: data.plan || 'Premium Monthly',
-          type: data.type || 'Subscription',
-          nextSession: data.nextSession || '',
-        });
-      } catch (error) {
-        console.error("Failed to fetch client:", error);
-      } finally {
-        setLoading(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clients`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        onClose();
+        onClientAdded?.();
+        toast.success('Client added successfully');
+      } else {
+        toast.error('Failed to add client');
       }
-    };
-    fetchClient();
-  }, [clientId]);
+    } catch (error) {
+      console.error('Error adding client:', error);
+      toast.error('An error occurred while adding the client');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData((prev) => ({
@@ -60,38 +60,8 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clients/${clientId}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        const updatedClient = await res.json();
-        onUpdated?.(updatedClient);
-        onClose();
-        toast.success('Client updated successfully');
-      } else {
-        toast.error('Failed to update client');
-      }
-    } catch (error) {
-      console.error('Error updating client:', error);
-      toast.error('An error occurred while updating the client');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading && !formData.name) return <div>Loading...</div>;
-
   return (
-    <Modal isOpen={true} onClose={onClose} title="Edit Client">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add New Client">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -214,25 +184,25 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
           <label htmlFor="nextSession" className="block text-sm font-medium text-gray-700">
             Next Session
           </label>
-          <Input
+          <input
             id="nextSession"
             name="nextSession"
-            type="text"
+            type="datetime-local"
             value={formData.nextSession}
             onChange={handleChange}
-            className="mt-1"
-            placeholder="e.g., Today, 10:00 AM"
+            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+            placeholder="Select date and time"
           />
         </div>
-        <div className="flex gap-2 pt-4">
-          <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+        <div className="flex gap-3">
+          <Button type="button" variant="danger" className="flex-1" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" className="flex-1" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Adding...' : 'Add Client'}
           </Button>
         </div>
       </form>
     </Modal>
   );
-}
+} 

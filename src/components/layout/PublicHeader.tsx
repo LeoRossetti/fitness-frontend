@@ -1,9 +1,9 @@
 'use client';
 
 import { Dumbbell } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import AuthModal from './AuthModal';
+import AuthModal from '@/components/auth/AuthModal';
 
 export default function PublicHeader() {
   const [showModal, setShowModal] = useState(false);
