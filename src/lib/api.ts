@@ -69,7 +69,16 @@ export const deleteClient = (id: number) =>
 export const getClientById = (id: number) => 
   makeRequest(`clients/${id}`);
 
-export const updateClient = (id: number, data: any) => 
+export const updateClient = (id: number, data: {
+  User: { name: string; email: string };
+  phone?: string;
+  goal?: string;
+  address?: string;
+  notes?: string;
+  plan?: string;
+  type?: string;
+  nextSession?: string | null;
+}) => 
   makeRequest(`clients/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data)

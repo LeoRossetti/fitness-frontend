@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, Plus, Dumbbell, Calendar, Target, Filter } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, Plus, Dumbbell, Heart, User, Activity, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getWorkoutTemplates, deleteWorkoutTemplate } from '@/lib/api';
@@ -11,12 +12,17 @@ import toast from 'react-hot-toast';
 import { ServerWorkoutTemplate } from '@/types/types';
 
 export default function WorkoutTemplatesPage() {
+  const router = useRouter();
   const [templates, setTemplates] = useState<ServerWorkoutTemplate[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<ServerWorkoutTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'All' | 'Strength' | 'Cardio' | 'Flexibility' | 'Bodyweight'>('All');
   const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null);
+
+  const handleCreateNewTemplate = () => {
+    router.push('/workouts');
+  };
 
   const fetchTemplates = async () => {
     try {
@@ -112,6 +118,21 @@ export default function WorkoutTemplatesPage() {
 
   const templatesToRender = Array.isArray(filteredTemplates) ? filteredTemplates : [];
 
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'cardio':
+        return <Heart className="w-4 h-4" />;
+      case 'bodyweight':
+        return <User className="w-4 h-4" />;
+      case 'flexibility':
+        return <Activity className="w-4 h-4" />;
+      case 'strength':
+        return <Dumbbell className="w-4 h-4" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -124,7 +145,7 @@ export default function WorkoutTemplatesPage() {
             type="button"
             className="flex items-center gap-2 cursor-pointer"
             variant="success"
-            onClick={() => {/* TODO: Navigate to workout builder */}}
+            onClick={handleCreateNewTemplate}
           >
             <Plus className="h-5 w-5" />
             Create New Template
@@ -155,11 +176,7 @@ export default function WorkoutTemplatesPage() {
                     : 'bg-gray-200 text-[#1F2A44] hover:bg-gray-300'
                 }`}
               >
-                {type === 'All' && <Dumbbell className="h-5 w-5" />}
-                {type === 'Strength' && <Dumbbell className="h-5 w-5" />}
-                {type === 'Cardio' && <Calendar className="h-5 w-5" />}
-                {type === 'Flexibility' && <Target className="h-5 w-5" />}
-                {type === 'Bodyweight' && <Dumbbell className="h-5 w-5" />}
+                {getCategoryIcon(type)}
                 {type}
               </button>
             ))}

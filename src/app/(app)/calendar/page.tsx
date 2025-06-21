@@ -376,7 +376,7 @@ export default function CalendarPage() {
               />
             </div>
             <div className="flex justify-end gap-2 mt-6">
-              <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
+              <Button type="button" variant="danger" onClick={() => setIsAddModalOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">

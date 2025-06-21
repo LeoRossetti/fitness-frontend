@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useContext } from 'react';
 import { Dumbbell } from 'lucide-react';
-import { SidebarContext } from '@/components/layout/SidebarProvider'; // импортируем контекст
+import { SidebarContext } from '@/components/layout/SidebarProvider';
 
 export default function DashboardHeader() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
-  const { collapsed } = useContext(SidebarContext); // получаем состояние из контекста
+  const { collapsed } = useContext(SidebarContext);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
@@ -65,4 +65,4 @@ export default function DashboardHeader() {
       )}
     </header>
   );
-}
+} 

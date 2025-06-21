@@ -219,7 +219,7 @@ export default function EditWorkoutTemplateModal({ templateId, onClose, onUpdate
               type="button"
               onClick={addExercise}
               className="flex items-center gap-1 text-sm"
-              variant="outline"
+              variant="default"
             >
               <Plus className="h-4 w-4" />
               Add Exercise
@@ -328,7 +328,7 @@ export default function EditWorkoutTemplateModal({ templateId, onClose, onUpdate
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" onClick={onClose} variant="outline">
+          <Button type="button" onClick={onClose} variant="danger">
             Cancel
           </Button>
           <Button type="submit" disabled={loading}>

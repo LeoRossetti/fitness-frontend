@@ -71,12 +71,35 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     setLoading(true);
 
     try {
-      const updatedClient = await updateClient(clientId, formData);
+      // Структурируем данные правильно для API
+      const updateData = {
+        User: {
+          name: formData.name,
+          email: formData.email
+        },
+        phone: formData.phone,
+        goal: formData.goal,
+        address: formData.address,
+        notes: formData.notes,
+        plan: formData.plan,
+        type: formData.type,
+        nextSession: formData.nextSession || null
+      };
+
+      console.log('Sending update data:', updateData);
+      const updatedClient = await updateClient(clientId, updateData);
+      console.log('Client updated successfully:', updatedClient);
+      
       onUpdated?.(updatedClient);
       onClose();
       toast.success('Client updated successfully');
     } catch (error) {
       console.error('Error updating client:', error);
+      console.error('Error details:', {
+        clientId,
+        formData,
+        error: error instanceof Error ? error.message : error
+      });
       toast.error('An error occurred while updating the client');
     } finally {
       setLoading(false);
@@ -220,7 +243,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
           />
         </div>
         <div className="flex gap-2 pt-4">
-          <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+          <Button type="button" variant="danger" className="flex-1" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" className="flex-1" disabled={loading}>

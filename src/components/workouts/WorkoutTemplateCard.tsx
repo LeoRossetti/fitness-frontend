@@ -1,7 +1,7 @@
 "use client";
 
 import { ServerWorkoutTemplate } from '@/types/types';
-import { Edit, Trash2, Dumbbell, Calendar, Target } from 'lucide-react';
+import { Edit, Trash2, Dumbbell, Heart, User, Activity } from 'lucide-react';
 
 interface WorkoutTemplateCardProps {
   template: ServerWorkoutTemplate;
@@ -11,15 +11,17 @@ interface WorkoutTemplateCardProps {
 
 export default function WorkoutTemplateCard({ template, onEdit, onDelete }: WorkoutTemplateCardProps) {
   const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Strength':
-        return <Dumbbell className="h-4 w-4" />;
-      case 'Cardio':
-        return <Calendar className="h-4 w-4" />;
-      case 'Flexibility':
-        return <Target className="h-4 w-4" />;
+    switch (category.toLowerCase()) {
+      case 'cardio':
+        return <Heart className="w-4 h-4" />;
+      case 'bodyweight':
+        return <User className="w-4 h-4" />;
+      case 'flexibility':
+        return <Activity className="w-4 h-4" />;
+      case 'strength':
+        return <Dumbbell className="w-4 h-4" />;
       default:
-        return <Dumbbell className="h-4 w-4" />;
+        return null;
     }
   };
 
@@ -29,8 +31,14 @@ export default function WorkoutTemplateCard({ template, onEdit, onDelete }: Work
         return 'bg-[#8B5CF6] text-white';
       case 'Cardio':
         return 'bg-[#10B981] text-white';
-      case 'Bodyweight':
+      case 'Flexibility':
         return 'bg-[#F59E0B] text-white';
+      case 'Bodyweight':
+        return 'bg-[#F97316] text-white';
+      case 'Balance':
+        return 'bg-[#3B82F6] text-white';
+      case 'Core':
+        return 'bg-[#EC4899] text-white';
       default:
         return 'bg-gray-200 text-[#1F2A44]';
     }

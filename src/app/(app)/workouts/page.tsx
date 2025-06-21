@@ -89,16 +89,16 @@ export default function WorkoutsPage() {
 
   const handleSaveWorkout = async () => {
     try {
-      await createWorkoutTemplate(
-        planName,
-        workoutExercises.map(ex => ({
+      await createWorkoutTemplate({
+        name: planName,
+        exercises: workoutExercises.map(ex => ({
           exerciseId: ex.id,
           sets: ex.sets,
           reps: ex.reps,
           weight: ex.weight,
           notes: ex.notes,
         }))
-      );
+      });
       
       // Очищаем черновик после успешного сохранения
       setWorkoutExercises([]);

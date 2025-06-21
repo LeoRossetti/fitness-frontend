@@ -218,15 +218,42 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        <div className="divide-y divide-gray-200">
-          {filteredClients.map(client => (
-            <ClientCard
-              key={client.id}
-              client={client}
-              onDelete={() => handleDeleteClient(client.id)}
-              onEdit={() => handleEdit(client.id)}
-            />
-          ))}
+        <div className="space-y-4">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchQuery || filter !== 'All' ? 'No clients found' : 'No clients yet'}
+              </h3>
+              <p className="text-gray-500 mb-6">
+                {searchQuery || filter !== 'All' 
+                  ? 'Try adjusting your search or filter criteria'
+                  : 'Get started by adding your first client'
+                }
+              </p>
+              {!searchQuery && filter === 'All' && (
+                <Button
+                  onClick={() => setIsOpen(true)}
+                  variant="success"
+                  className="flex items-center gap-2 mx-auto"
+                >
+                  <Plus className="h-5 w-5" />
+                  Add Your First Client
+                </Button>
+              )}
+            </div>
+          ) : (
+            filteredClients.map(client => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                onDelete={() => handleDeleteClient(client.id)}
+                onEdit={() => handleEdit(client.id)}
+              />
+            ))
+          )}
         </div>
       </div>
 
