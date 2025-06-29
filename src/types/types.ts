@@ -15,6 +15,9 @@ export interface Client extends Omit<User, "role"> {
   plan?: "Premium Monthly" | "Standard Weekly" | "Single Session";
   type: "Subscription" | "One-time";
   nextSession?: string;
+  age?: number;
+  height?: number;
+  weight?: number;
   role: "Client";
   User?: {
     name: string;

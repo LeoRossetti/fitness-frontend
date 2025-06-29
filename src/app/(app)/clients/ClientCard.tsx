@@ -1,7 +1,7 @@
 "use client";
 
 import { Client } from '@/types/types';
-import { Edit, Trash2, Calendar, Target, Phone, Mail, User, Clock, Crown } from 'lucide-react';
+import { Edit, Trash2, Calendar, Target, Phone, Mail, User, Clock, Crown, Ruler, Scale, UserCheck } from 'lucide-react';
 
 interface ClientCardProps {
   client: Client;
@@ -126,7 +126,7 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
             </div>
 
             {/* Дополнительная информация */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {client.goal && (
                 <div className="flex items-start gap-2">
                   <Target className="h-4 w-4 text-violet-500 mt-0.5 flex-shrink-0" />
@@ -153,6 +153,36 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
                   <div>
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</p>
                     <p className="text-sm text-gray-700">{client.type}</p>
+                  </div>
+                </div>
+              )}
+
+              {client.age && (
+                <div className="flex items-start gap-2">
+                  <UserCheck className="h-4 w-4 text-indigo-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Age</p>
+                    <p className="text-sm text-gray-700">{client.age} years</p>
+                  </div>
+                </div>
+              )}
+
+              {client.height && (
+                <div className="flex items-start gap-2">
+                  <Ruler className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Height</p>
+                    <p className="text-sm text-gray-700">{client.height} cm</p>
+                  </div>
+                </div>
+              )}
+
+              {client.weight && (
+                <div className="flex items-start gap-2">
+                  <Scale className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Weight</p>
+                    <p className="text-sm text-gray-700">{client.weight} kg</p>
                   </div>
                 </div>
               )}

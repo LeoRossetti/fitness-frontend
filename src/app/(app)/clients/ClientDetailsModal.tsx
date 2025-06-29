@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Client, Session } from '@/types/types';
 import { getClientById, getSessionsByMonth } from '@/lib/api';
-import { X, User, Mail, Phone, MapPin, Target, Calendar, Clock, Crown, TrendingUp, Activity, FileText, Edit } from 'lucide-react';
+import { X, User, Mail, Phone, MapPin, Target, Calendar, Clock, Crown, TrendingUp, Activity, FileText, Edit, Ruler, Scale, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 
@@ -218,6 +218,45 @@ export default function ClientDetailsModal({ isOpen, onClose, clientId, onEdit }
                       </div>
                     )}
                   </section>
+
+                  {/* Physical Parameters */}
+                  {(client.age || client.height || client.weight) && (
+                    <section className="border border-gray-100 bg-white rounded-xl p-6 md:col-span-2">
+                      <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-2">
+                        <Activity className="h-5 w-5 text-indigo-500" />
+                        Physical Parameters
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {client.age && (
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="h-4 w-4 text-indigo-500" />
+                            <div>
+                              <p className="text-xs font-medium text-gray-500">Age</p>
+                              <p className="text-sm font-semibold text-gray-900">{client.age} years</p>
+                            </div>
+                          </div>
+                        )}
+                        {client.height && (
+                          <div className="flex items-center gap-2">
+                            <Ruler className="h-4 w-4 text-green-500" />
+                            <div>
+                              <p className="text-xs font-medium text-gray-500">Height</p>
+                              <p className="text-sm font-semibold text-gray-900">{client.height} cm</p>
+                            </div>
+                          </div>
+                        )}
+                        {client.weight && (
+                          <div className="flex items-center gap-2">
+                            <Scale className="h-4 w-4 text-purple-500" />
+                            <div>
+                              <p className="text-xs font-medium text-gray-500">Weight</p>
+                              <p className="text-sm font-semibold text-gray-900">{client.weight} kg</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  )}
 
                   {/* Statistics */}
                   <section className="border border-gray-100 bg-white rounded-xl p-6 md:col-span-2">

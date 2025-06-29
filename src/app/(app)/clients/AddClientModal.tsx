@@ -20,12 +20,14 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
     name: '',
     email: '',
     phone: '',
-    goal: '',
     address: '',
-    notes: '',
-    plan: 'Premium Monthly' as const,
+    goal: '',
+    plan: 'Standard Weekly' as const,
     type: 'Subscription' as const,
-    nextSession: '',
+    age: '',
+    height: '',
+    weight: '',
+    notes: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,11 +35,19 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
     setLoading(true);
 
     try {
+      // Подготавливаем данные, конвертируя числовые поля
+      const submitData = {
+        ...formData,
+        age: formData.age ? parseInt(formData.age) : undefined,
+        height: formData.height ? parseInt(formData.height) : undefined,
+        weight: formData.weight ? parseInt(formData.weight) : undefined,
+      };
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clients`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (res.ok) {
@@ -175,16 +185,42 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
           </Select>
         </div>
         <div>
-          <label htmlFor="nextSession" className="block text-sm font-medium text-primary mb-2">
-            Next Session
+          <label htmlFor="age" className="block text-sm font-medium text-primary mb-2">
+            Age
           </label>
           <Input
-            id="nextSession"
-            name="nextSession"
-            type="datetime-local"
-            value={formData.nextSession}
+            id="age"
+            name="age"
+            type="text"
+            value={formData.age}
             onChange={handleChange}
-            className="cursor-pointer"
+            placeholder="Enter client's age"
+          />
+        </div>
+        <div>
+          <label htmlFor="height" className="block text-sm font-medium text-primary mb-2">
+            Height
+          </label>
+          <Input
+            id="height"
+            name="height"
+            type="text"
+            value={formData.height}
+            onChange={handleChange}
+            placeholder="Enter client's height"
+          />
+        </div>
+        <div>
+          <label htmlFor="weight" className="block text-sm font-medium text-primary mb-2">
+            Weight
+          </label>
+          <Input
+            id="weight"
+            name="weight"
+            type="text"
+            value={formData.weight}
+            onChange={handleChange}
+            placeholder="Enter client's weight"
           />
         </div>
         <div className="flex gap-3">

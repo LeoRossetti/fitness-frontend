@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getExercises } from "@/lib/api";
 import { Search, Plus } from 'lucide-react';
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,6 @@ interface ExerciseLibraryProps {
   onSelectExercise: (exercise: Exercise) => void;
 }
 
-const categories = ["All", "Strength", "Cardio", "Flexibility", "Balance", "Core"];
-
 export default function ExerciseLibrary({ onSelectExercise }: ExerciseLibraryProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
@@ -28,6 +26,30 @@ export default function ExerciseLibrary({ onSelectExercise }: ExerciseLibraryPro
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Динамически создаем список категорий на основе реальных данных
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(exercises.map(ex => ex.category))];
+    return ["All", ...uniqueCategories.sort()];
+  }, [exercises]);
+
+  // Подсчитываем количество упражнений для каждой категории
+  const categoryCounts = useMemo(() => {
+    const counts: { [key: string]: number } = { "All": exercises.length };
+    
+    exercises.forEach(ex => {
+      counts[ex.category] = (counts[ex.category] || 0) + 1;
+    });
+    
+    return counts;
+  }, [exercises]);
+
+  // Сбрасываем активную категорию, если она больше не существует
+  useEffect(() => {
+    if (!categories.includes(activeCategory)) {
+      setActiveCategory("All");
+    }
+  }, [categories, activeCategory]);
 
   const fetchExercises = async () => {
     try {
@@ -94,7 +116,12 @@ export default function ExerciseLibrary({ onSelectExercise }: ExerciseLibraryPro
     <>
       <div className="bg-white rounded-xl shadow-lg p-6 w-[350px]">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Exercise Library</h2>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Exercise Library</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {exercises.length} exercise{exercises.length !== 1 ? 's' : ''} total
+            </p>
+          </div>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium"
@@ -122,19 +149,32 @@ export default function ExerciseLibrary({ onSelectExercise }: ExerciseLibraryPro
             <button
               key={cat}
               onClick={() => handleCategoryChange(cat)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${
                 activeCategory === cat
                   ? "bg-violet-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              {cat}
+              <span>{cat}</span>
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                activeCategory === cat
+                  ? "bg-white/20 text-white"
+                  : "bg-gray-200 text-gray-600"
+              }`}>
+                {categoryCounts[cat] || 0}
+              </span>
             </button>
           ))}
         </div>
 
         {/* Exercise list */}
         <div className="space-y-3 max-h-[500px] overflow-y-auto">
+          {(activeCategory !== "All" || searchQuery) && (
+            <div className="text-sm text-gray-500 mb-2">
+              Showing {filteredExercises.length} of {exercises.length} exercises
+              {searchQuery && ` matching "${searchQuery}"`}
+            </div>
+          )}
           {Array.isArray(filteredExercises) && filteredExercises.map((ex) => (
             <div
               key={ex.id}

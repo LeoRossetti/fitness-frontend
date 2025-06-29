@@ -23,12 +23,14 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     name: '',
     email: '',
     phone: '',
-    goal: '',
     address: '',
-    notes: '',
-    plan: 'Premium Monthly' as const,
+    goal: '',
+    plan: 'Standard Weekly' as const,
     type: 'Subscription' as const,
-    nextSession: '',
+    age: '',
+    height: '',
+    weight: '',
+    notes: ''
   });
 
   useEffect(() => {
@@ -41,12 +43,14 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
           name: data.User?.name || '',
           email: data.User?.email || '',
           phone: data.phone || '',
-          goal: data.goal || '',
           address: data.address || '',
-          notes: data.notes || '',
-          plan: data.plan || 'Premium Monthly',
+          goal: data.goal || '',
+          plan: data.plan || 'Standard Weekly',
           type: data.type || 'Subscription',
-          nextSession: data.nextSession || '',
+          age: data.age || '',
+          height: data.height || '',
+          weight: data.weight || '',
+          notes: data.notes || '',
         });
       } catch (error) {
         console.error("Failed to fetch client:", error);
@@ -85,7 +89,9 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
         notes: formData.notes,
         plan: formData.plan,
         type: formData.type,
-        nextSession: formData.nextSession || null
+        age: formData.age ? parseInt(formData.age) : undefined,
+        height: formData.height ? parseInt(formData.height) : undefined,
+        weight: formData.weight ? parseInt(formData.weight) : undefined,
       };
 
       console.log('Sending update data:', updateData);
@@ -223,16 +229,42 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
           </Select>
         </div>
         <div>
-          <label htmlFor="nextSession" className="block text-sm font-medium text-primary mb-2">
-            Next Session
+          <label htmlFor="age" className="block text-sm font-medium text-primary mb-2">
+            Age
           </label>
           <Input
-            id="nextSession"
-            name="nextSession"
+            id="age"
+            name="age"
             type="text"
-            value={formData.nextSession}
+            value={formData.age}
             onChange={handleChange}
-            placeholder="e.g., Today, 10:00 AM"
+            placeholder="e.g., 25"
+          />
+        </div>
+        <div>
+          <label htmlFor="height" className="block text-sm font-medium text-primary mb-2">
+            Height
+          </label>
+          <Input
+            id="height"
+            name="height"
+            type="text"
+            value={formData.height}
+            onChange={handleChange}
+            placeholder="e.g., 180 cm"
+          />
+        </div>
+        <div>
+          <label htmlFor="weight" className="block text-sm font-medium text-primary mb-2">
+            Weight
+          </label>
+          <Input
+            id="weight"
+            name="weight"
+            type="text"
+            value={formData.weight}
+            onChange={handleChange}
+            placeholder="e.g., 75 kg"
           />
         </div>
         <div className="flex gap-2 pt-4">
