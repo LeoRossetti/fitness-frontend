@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import ClientCard from '@/components/clients/ClientCard';
-import AddClientModal from '@/components/clients/AddClientModal';
-import EditClientModal from '@/components/clients/EditClientModal';
+import ClientCard from './ClientCard';
+import AddClientModal from './AddClientModal';
+import EditClientModal from './EditClientModal';
+import ClientDetailsModal from './ClientDetailsModal';
 import { Client } from '@/types/types';
 import { getClients, deleteClient } from '@/lib/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
@@ -22,6 +23,7 @@ export default function ClientsPage() {
   const [filter, setFilter] = useState<'All' | 'Subscription' | 'Single Session'>('All');
 
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
+  const [viewingClientId, setViewingClientId] = useState<number | null>(null);
 
   const fetchClients = async () => {
     try {
@@ -251,6 +253,7 @@ export default function ClientsPage() {
                 client={client}
                 onDelete={() => handleDeleteClient(client.id)}
                 onEdit={() => handleEdit(client.id)}
+                onClick={() => setViewingClientId(client.id)}
               />
             ))
           )}
@@ -263,6 +266,16 @@ export default function ClientsPage() {
         onClose={() => setIsOpen(false)}
         onClientAdded={handleAddClient}
       />
+
+      {/* Модалка просмотра клиента */}
+      {viewingClientId !== null && (
+        <ClientDetailsModal
+          isOpen={viewingClientId !== null}
+          onClose={() => setViewingClientId(null)}
+          clientId={viewingClientId}
+          onEdit={handleEdit}
+        />
+      )}
 
       {/* Модалка редактирования клиента */}
       {editingClientId !== null && (

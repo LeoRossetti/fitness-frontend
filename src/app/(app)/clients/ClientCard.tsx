@@ -7,6 +7,7 @@ interface ClientCardProps {
   client: Client;
   onDelete: () => void;
   onEdit: (clientId: number) => void;
+  onClick?: () => void;
 }
 
 const formatNextSession = (dateString: string | undefined) => {
@@ -76,12 +77,20 @@ const getInitials = (name: string | undefined) => {
     .slice(0, 2);
 };
 
-export default function ClientCard({ client, onDelete, onEdit }: ClientCardProps) {
+export default function ClientCard({ client, onDelete, onEdit, onClick }: ClientCardProps) {
   const nextSession = formatNextSession(client.nextSession);
   const hasNextSession = nextSession !== 'Not scheduled' && nextSession !== 'Invalid date format';
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    onClick?.();
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 p-6 mb-4">
+    <div
+      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 p-6 mb-4 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="flex items-start justify-between">
         {/* Основная информация */}
         <div className="flex items-start gap-4 flex-1">

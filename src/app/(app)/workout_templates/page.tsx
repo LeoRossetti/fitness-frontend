@@ -6,8 +6,8 @@ import { Search, Plus, Dumbbell, Heart, User, Activity, Filter } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getWorkoutTemplates, deleteWorkoutTemplate } from '@/lib/api';
-import WorkoutTemplateCard from '@/components/workouts/WorkoutTemplateCard';
-import EditWorkoutTemplateModal from '@/components/workouts/EditWorkoutTemplateModal';
+import WorkoutTemplateCard from './WorkoutTemplateCard';
+import EditWorkoutTemplateModal from './EditWorkoutTemplateModal';
 import toast from 'react-hot-toast';
 import { ServerWorkoutTemplate } from '@/types/types';
 

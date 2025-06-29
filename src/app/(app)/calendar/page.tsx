@@ -7,23 +7,12 @@ import { getClients, createSession, getSessionsByMonth, deleteSession, updateCli
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { isSameDay } from 'date-fns';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { TextField } from '@/components/ui/textfield';
+import { isSameDay } from 'date-fns';
 import { toast } from 'react-hot-toast';
-
-interface Session {
-  id: number;
-  date: string;
-  time: string;
-  note: string;
-  Client: {
-    id: number;
-    User: {
-      name: string;
-    };
-  };
-  type: 'personal' | 'group' | 'consultation';
-}
+import { Session } from '@/types/types';
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -67,7 +56,7 @@ export default function CalendarPage() {
     }
   }, [isAddModalOpen]);
 
-  const getSessionTypeColor = (type: Session['type']) => {
+  const getSessionTypeColor = (type: string) => {
     switch (type) {
       case 'personal':
         return 'bg-blue-100 text-blue-800';
@@ -99,7 +88,7 @@ export default function CalendarPage() {
 
   // Вспомогательная функция для получения имени клиента
   const getClientName = (session: Session) => {
-    return session.Client?.User?.name || '—';
+    return session.client?.User?.name || '—';
   };
 
   // Генерируем опции времени с шагом 15 минут с 07:00 до 22:00
@@ -109,7 +98,7 @@ export default function CalendarPage() {
       const hour = 7 + Math.floor(i / 4);
       const minute = (i % 4) * 15;
       const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      return { value, label: value };
+      return { value, label: value, disabled: false };
     })
   ];
 
@@ -195,7 +184,7 @@ export default function CalendarPage() {
         return;
       }
 
-      const clientId = session.Client?.id;
+      const clientId = session.clientId;
       if (!clientId) {
         console.error('Client ID not found in session:', session);
         toast.error('Client information not found');
@@ -319,18 +308,17 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Add Session Modal (TODO: Implement) */}
+      {/* Add Session Modal */}
       {isAddModalOpen && (
         <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add New Session">
           <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleSave(); }}>
             <div>
-              <label className="block text-sm font-medium mb-1">Client</label>
-              <select
+              <label className="block text-sm font-medium text-primary mb-2">Client</label>
+              <Select
                 name="clientId"
                 value={form.clientId}
                 onChange={handleFormChange}
                 required
-                className="w-full border rounded px-3 py-2 cursor-pointer"
               >
                 <option value="" disabled>Select client</option>
                 {clients.map(client => (
@@ -338,39 +326,41 @@ export default function CalendarPage() {
                     {client.User?.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Type</label>
-              <select
+              <label className="block text-sm font-medium text-primary mb-2">Type</label>
+              <Select
                 name="type"
                 value={form.type}
                 onChange={handleFormChange}
-                className="w-full border rounded px-3 py-2 cursor-pointer"
               >
                 <option value="personal">Personal</option>
                 {/* <option value="group">Group</option> */}
                 <option value="consultation">Consultation</option>
-              </select>
+              </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Time</label>
+              <label className="block text-sm font-medium text-primary mb-2">Time</label>
               <Select
                 name="time"
                 value={form.time}
                 onChange={handleFormChange}
-                options={timeOptions}
                 required
-                className="cursor-pointer"
-              />
+              >
+                {timeOptions.map(option => (
+                  <option key={option.value} value={option.value} disabled={option.disabled}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Note</label>
-              <textarea
+              <label className="block text-sm font-medium text-primary mb-2">Note</label>
+              <TextField
                 name="note"
                 value={form.note}
                 onChange={handleFormChange}
-                className="w-full border rounded px-3 py-2 cursor-pointer"
                 rows={2}
                 placeholder="Optional note..."
               />

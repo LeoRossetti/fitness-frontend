@@ -7,6 +7,8 @@ import { Client } from "@/types/types";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
+import { Select } from '@/components/ui/select';
+import { TextField } from "@/components/ui/textfield";
 import toast from 'react-hot-toast';
 
 type Props = {
@@ -109,10 +111,10 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
   if (loading && !formData.name) return <div>Loading...</div>;
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Edit Client">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal isOpen={true} onClose={onClose} size="lg" title="Edit Client">
+      <form onSubmit={handleSubmit} className="space-y-4 min-w-[28rem]">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-primary mb-2">
             Name
           </label>
           <Input
@@ -122,12 +124,11 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
             required
             value={formData.name}
             onChange={handleChange}
-            className="mt-1"
             placeholder="John Doe"
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-sm font-medium text-primary mb-2">
             Email
           </label>
           <Input
@@ -137,12 +138,11 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
             required
             value={formData.email}
             onChange={handleChange}
-            className="mt-1"
             placeholder="john@example.com"
           />
         </div>
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="phone" className="block text-sm font-medium text-primary mb-2">
             Phone
           </label>
           <Input
@@ -151,12 +151,11 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
             type="tel"
             value={formData.phone}
             onChange={handleChange}
-            className="mt-1"
             placeholder="+1 (555) 000-0000"
           />
         </div>
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="address" className="block text-sm font-medium text-primary mb-2">
             Address
           </label>
           <Input
@@ -165,71 +164,66 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
             type="text"
             value={formData.address}
             onChange={handleChange}
-            className="mt-1"
             placeholder="123 Main St, City, Country"
           />
         </div>
         <div>
-          <label htmlFor="goal" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="goal" className="block text-sm font-medium text-primary mb-2">
             Fitness Goals
           </label>
-          <textarea
+          <TextField
             id="goal"
             name="goal"
             value={formData.goal}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             rows={3}
             placeholder="Enter client's fitness goals..."
           />
         </div>
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="notes" className="block text-sm font-medium text-primary mb-2">
             Notes
           </label>
-          <textarea
+          <TextField
             id="notes"
             name="notes"
             value={formData.notes}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             rows={3}
             placeholder="Additional notes about the client..."
           />
         </div>
         <div>
-          <label htmlFor="plan" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="plan" className="block text-sm font-medium text-primary mb-2">
             Plan
           </label>
-          <select
+          <Select
             id="plan"
             name="plan"
             value={formData.plan}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <option value="Premium Monthly">Premium Monthly</option>
             <option value="Standard Weekly">Standard Weekly</option>
             <option value="Single Session">Single Session</option>
-          </select>
+          </Select>
         </div>
         <div>
-          <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="type" className="block text-sm font-medium text-primary mb-2">
             Type
           </label>
-          <select
+          <Select
             id="type"
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <option value="Subscription">Subscription</option>
             <option value="One-time">One-time</option>
-          </select>
+          </Select>
         </div>
         <div>
-          <label htmlFor="nextSession" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="nextSession" className="block text-sm font-medium text-primary mb-2">
             Next Session
           </label>
           <Input
@@ -238,7 +232,6 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
             type="text"
             value={formData.nextSession}
             onChange={handleChange}
-            className="mt-1"
             placeholder="e.g., Today, 10:00 AM"
           />
         </div>

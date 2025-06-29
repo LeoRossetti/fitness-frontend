@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ExerciseLibrary from "@/components/workouts/ExerciseLibrary";
-import WorkoutPlan from "@/components/workouts/WorkoutPlan";
+import ExerciseLibrary from "./ExerciseLibrary";
+import WorkoutPlan from "./WorkoutPlan";
 import { createWorkoutTemplate } from "@/lib/api";
 import toast from "react-hot-toast";
 
