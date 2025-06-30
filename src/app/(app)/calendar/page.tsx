@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { Plus, Clock, User, Calendar as CalendarIcon } from 'lucide-react';
-import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession } from '@/lib/api';
+import { Plus, Clock, User, Calendar as CalendarIcon, StickyNote } from 'lucide-react';
+import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession, updateSessionStatus, getWorkoutTemplates, updateSession } from '@/lib/api';
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
@@ -12,20 +12,59 @@ import { Select } from '@/components/ui/select';
 import { TextField } from '@/components/ui/textfield';
 import { isSameDay } from 'date-fns';
 import { toast } from 'react-hot-toast';
-import { Session } from '@/types/types';
+import { Session, WorkoutTemplate, ServerWorkoutTemplate } from '@/types/types';
+import { Avatar } from '@/components/ui/Avatar';
+import WorkoutTemplateCard from '../workout_templates/WorkoutTemplateCard';
+import SessionDetailsModal from './SessionDetailsModal';
+
+// Helper function for status color
+const getStatusBadge = (status?: string) => {
+  const map: Record<string, string> = {
+    scheduled: 'bg-gray-200 text-gray-700',
+    completed: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700',
+    no_show: 'bg-yellow-100 text-yellow-800',
+  };
+  if (!status) return null;
+  return (
+    <span className={`ml-2 px-2 py-0.5 rounded text-xs font-semibold ${map[status] || 'bg-gray-200 text-gray-700'}`}>
+      {status === 'no_show' ? 'No Show' : status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  );
+};
+
+// Status color map
+const statusColorMap: Record<string, string> = {
+  scheduled: 'bg-gray-300',
+  completed: 'bg-green-400',
+  cancelled: 'bg-red-400',
+  no_show: 'bg-yellow-400',
+};
+const statusLabelMap: Record<string, string> = {
+  scheduled: 'Scheduled',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  no_show: 'No show',
+};
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [clients, setClients] = useState<{ id: number; User: { name: string } }[]>([]);
+  const [templates, setTemplates] = useState<ServerWorkoutTemplate[]>([]);
   const [form, setForm] = useState({
     clientId: '',
-    type: 'personal',
+    workoutTemplateId: '',
     time: '',
     note: '',
+    duration: '60',
   });
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [isStatusUpdating, setIsStatusUpdating] = useState<number | null>(null);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [editForm, setEditForm] = useState<{ note: string }>({ note: '' });
 
   // Получаем сессии за месяц при первом рендере и смене месяца
   useEffect(() => {
@@ -53,21 +92,14 @@ export default function CalendarPage() {
           console.error('Failed to fetch clients:', err);
           toast.error('Failed to load clients');
         });
+      getWorkoutTemplates()
+        .then(res => setTemplates(res.templates))
+        .catch((err) => {
+          console.error('Failed to fetch templates:', err);
+          toast.error('Failed to load templates');
+        });
     }
   }, [isAddModalOpen]);
-
-  const getSessionTypeColor = (type: string) => {
-    switch (type) {
-      case 'personal':
-        return 'bg-blue-100 text-blue-800';
-      case 'group':
-        return 'bg-purple-100 text-purple-800';
-      case 'consultation':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   // Обработчик изменения полей формы
   const handleFormChange = (
@@ -87,8 +119,22 @@ export default function CalendarPage() {
   };
 
   // Вспомогательная функция для получения имени клиента
-  const getClientName = (session: Session) => {
-    return session.client?.User?.name || '—';
+  const getClientName = (session: any) => {
+    return session.Client?.User?.name || session.client?.User?.name || '—';
+  };
+
+  // Вспомогательная функция для форматирования длительности
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) return `${minutes} min`;
+    if (minutes === 60) return '1 hour';
+    
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    
+    if (remainingMinutes === 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    }
+    return `${hours}h ${remainingMinutes}m`;
   };
 
   // Генерируем опции времени с шагом 15 минут с 07:00 до 22:00
@@ -102,10 +148,20 @@ export default function CalendarPage() {
     })
   ];
 
+  // Опции для длительности сессии
+  const durationOptions = [
+    { value: '30', label: '30 minutes' },
+    { value: '45', label: '45 minutes' },
+    { value: '60', label: '1 hour' },
+    { value: '75', label: '1 hour 15 minutes' },
+    { value: '90', label: '1.5 hours' },
+    { value: '120', label: '2 hours' },
+  ];
+
   // Обработчик сохранения
   const handleSave = async () => {
-    if (!selectedDate || !form.time) {
-      toast.error('Please select a date and time');
+    if (!selectedDate || !form.time || !form.workoutTemplateId) {
+      toast.error('Please select a date, time and workout template');
       return;
     }
 
@@ -138,9 +194,10 @@ export default function CalendarPage() {
 
       const sessionData = {
         clientId: Number(form.clientId),
-        type: form.type,
+        workoutTemplateId: Number(form.workoutTemplateId),
         time: form.time,
         note: form.note,
+        duration: Number(form.duration),
         date,
       };
 
@@ -159,9 +216,10 @@ export default function CalendarPage() {
       setCurrentMonth(new Date(selectedDate));
       setForm({
         clientId: '',
-        type: 'personal',
+        workoutTemplateId: '',
         time: '',
         note: '',
+        duration: '60',
       });
     } catch (err) {
       console.error('Failed to create session:', err);
@@ -203,6 +261,51 @@ export default function CalendarPage() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to cancel session';
       toast.error(errorMessage);
     }
+  };
+
+  const handleStatusChange = async (sessionId: number, newStatus: string) => {
+    setIsStatusUpdating(sessionId);
+    try {
+      await updateSessionStatus(sessionId, newStatus);
+      setSessions(sessions =>
+        sessions.map(s =>
+          s.id === sessionId ? { ...s, status: newStatus as Session['status'] } : s
+        )
+      );
+      toast.success('Status updated');
+    } catch (err) {
+      toast.error('Failed to update status');
+    } finally {
+      setIsStatusUpdating(null);
+    }
+  };
+
+  // Открыть модалку редактирования
+  const handleEditClick = () => {
+    if (selectedSession) {
+      setEditForm({ note: selectedSession.note || '' });
+      setIsEditingNote(true);
+    }
+  };
+
+  // Сохранить изменения
+  const handleEditSave = async () => {
+    if (!selectedSession) return;
+    try {
+      await updateSession(selectedSession.id, { note: editForm.note });
+      setSessions((prev) => prev.map(s => s.id === selectedSession.id ? { ...s, note: editForm.note } : s));
+      setSelectedSession((prev) => prev ? { ...prev, note: editForm.note } : prev);
+      setIsEditingNote(false);
+      toast.success('Note updated');
+    } catch (e) {
+      toast.error('Failed to update note');
+    }
+  };
+
+  // Отмена редактирования
+  const handleEditCancel = () => {
+    setIsEditingNote(false);
+    setEditForm({ note: selectedSession?.note || '' });
   };
 
   return (
@@ -273,33 +376,37 @@ export default function CalendarPage() {
                 {sessionsForSelectedDate.map((session) => (
                   <div
                     key={session.id}
-                    className="p-4 rounded-lg border border-gray-200 hover:border-[#10B981] transition-colors"
+                    className="flex items-center justify-between bg-gray-50 rounded-lg shadow-sm p-4 mb-3 group cursor-pointer"
+                    onClick={() => setSelectedSession(session)}
                   >
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      <span>
-                        {getClientName(session)}
-                      </span>
-                      <span className="ml-2 px-2 py-0.5 rounded bg-gray-100 text-xs">{session.type}</span>
-                      <Button
-                        type="button"
-                        variant="danger"
-                        size="sm"
-                        className="ml-2"
-                        onClick={() => handleDeleteSession(session.id)}
-                      >
-                        Cancel Session
-                      </Button>
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        name={getClientName(session as any)}
+                        photoUrl={(session as any).Client?.profile || (session as any).client?.profile}
+                        size="w-10 h-10"
+                      />
+                      <div>
+                        <div className="font-semibold text-[#1F2A44] flex items-center gap-2">
+                          {getClientName(session as any)}
+                          <span
+                            className={`w-2 h-2 rounded-full ${statusColorMap[session.status || 'scheduled']}`}
+                            title={statusLabelMap[session.status || 'scheduled']}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">
+                            {session.WorkoutTemplate?.name || '—'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-[#6B7280] mt-1">
-                      <Clock className="h-4 w-4" />
-                      <span>
-                        {getTimeFromDateString(session.date)}
-                      </span>
+                    <div className="flex flex-col items-end min-w-[120px]">
+                      <div className="flex items-center gap-1 text-[#1F2A44] font-medium">
+                        <Clock className="h-4 w-4" />
+                        <span>{getTimeFromDateString(session.date)}</span>
+                      </div>
+                      <span className="text-xs text-gray-500 mt-1">{session.duration ? formatDuration(session.duration) : ''}</span>
                     </div>
-                    {session.note && (
-                      <p className="mt-2 text-sm text-[#6B7280]">{session.note}</p>
-                    )}
                   </div>
                 ))}
               </div>
@@ -329,15 +436,17 @@ export default function CalendarPage() {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary mb-2">Type</label>
+              <label className="block text-sm font-medium text-primary mb-2">Workout Template</label>
               <Select
-                name="type"
-                value={form.type}
+                name="workoutTemplateId"
+                value={form.workoutTemplateId}
                 onChange={handleFormChange}
+                required
               >
-                <option value="personal">Personal</option>
-                {/* <option value="group">Group</option> */}
-                <option value="consultation">Consultation</option>
+                <option value="" disabled>Select workout template</option>
+                {templates.map(template => (
+                  <option key={template.id} value={template.id}>{template.name}</option>
+                ))}
               </Select>
             </div>
             <div>
@@ -350,6 +459,21 @@ export default function CalendarPage() {
               >
                 {timeOptions.map(option => (
                   <option key={option.value} value={option.value} disabled={option.disabled}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-primary mb-2">Duration (minutes)</label>
+              <Select
+                name="duration"
+                value={form.duration}
+                onChange={handleFormChange}
+                required
+              >
+                {durationOptions.map(option => (
+                  <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
@@ -375,6 +499,40 @@ export default function CalendarPage() {
             </div>
           </form>
         </Modal>
+      )}
+
+      {selectedSession && (
+        <SessionDetailsModal
+          isOpen={!!selectedSession}
+          onClose={() => { setSelectedSession(null); setIsEditingNote(false); }}
+          session={selectedSession}
+          onUpdate={async (note) => {
+            if (!selectedSession) return;
+            try {
+              await updateSession(selectedSession.id, { note });
+              setSessions((prev) => prev.map(s => s.id === selectedSession.id ? { ...s, note } : s));
+              setSelectedSession((prev) => prev ? { ...prev, note } : prev);
+              toast.success('Note updated');
+            } catch (e) {
+              toast.error('Failed to update note');
+            }
+          }}
+          onDelete={() => { handleDeleteSession(selectedSession.id); setSelectedSession(null); }}
+          onStatusChange={async (newStatus) => {
+            if (!selectedSession) return;
+            setIsStatusUpdating(selectedSession.id);
+            try {
+              await updateSession(selectedSession.id, { status: newStatus as Session['status'] });
+              setSessions((prev) => prev.map(s => s.id === selectedSession.id ? { ...s, status: newStatus as Session['status'] } : s));
+              setSelectedSession((prev) => prev ? { ...prev, status: newStatus as Session['status'] } : prev);
+            } catch (e) {
+              toast.error('Failed to update status');
+            } finally {
+              setIsStatusUpdating(null);
+            }
+          }}
+          isStatusUpdating={isStatusUpdating === selectedSession.id}
+        />
       )}
     </div>
   );

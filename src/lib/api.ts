@@ -34,23 +34,68 @@ const makeRequest = async (endpoint: string, options: RequestInit & { params?: R
     url += `?${searchParams.toString()}`;
   }
 
-  // Делаем запрос к серверу
-  // Пример: GET запрос к 'http://localhost:1337/api/sessions?date=2024-01-15'
-  const response = await fetch(url, {
-    credentials: 'include', // Отправляем куки для авторизации
-    headers: { 'Content-Type': 'application/json' }, // Говорим серверу что отправляем JSON
-    ...fetchOptions // Добавляем дополнительные настройки (method, body и т.д.)
-  });
+  try {
+    // Делаем запрос к серверу
+    // Пример: GET запрос к 'http://localhost:1337/api/sessions?date=2024-01-15'
+    const response = await fetch(url, {
+      credentials: 'include', // Отправляем куки для авторизации
+      headers: { 'Content-Type': 'application/json' }, // Говорим серверу что отправляем JSON
+      ...fetchOptions // Добавляем дополнительные настройки (method, body и т.д.)
+    });
 
-  // Проверяем успешность запроса
-  // Пример: если сервер вернул 404 или 500, выбрасываем ошибку
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
+    // Проверяем успешность запроса
+    if (!response.ok) {
+      let errorMessage = `API Error: ${response.status}`;
+      
+      // Пытаемся получить детальную информацию об ошибке
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMessage += ` - ${errorData.message}`;
+        }
+      } catch (parseError) {
+        // Если не удалось распарсить JSON, используем текст ответа
+        try {
+          const errorText = await response.text();
+          if (errorText) {
+            errorMessage += ` - ${errorText}`;
+          }
+        } catch (textError) {
+          // Если и текст не удалось получить, добавляем стандартное сообщение
+          switch (response.status) {
+            case 401:
+              errorMessage += ' - Unauthorized. Please log in.';
+              break;
+            case 403:
+              errorMessage += ' - Forbidden. Insufficient permissions.';
+              break;
+            case 404:
+              errorMessage += ' - Not found.';
+              break;
+            case 500:
+              errorMessage += ' - Internal server error. Please try again later.';
+              break;
+            default:
+              errorMessage += ' - Request failed.';
+          }
+        }
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    // Возвращаем данные в формате JSON
+    // Пример: { id: 1, name: 'John', email: 'john@example.com' }
+    return response.json();
+  } catch (error) {
+    // Если это ошибка сети или другой тип ошибки
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    }
+    
+    // Перебрасываем остальные ошибки
+    throw error;
   }
-
-  // Возвращаем данные в формате JSON
-  // Пример: { id: 1, name: 'John', email: 'john@example.com' }
-  return response.json();
 };
 
 // ---------------------------------------------------------------------------------------CLIENTS------------------------------------------------------------------------------------------------
@@ -83,6 +128,17 @@ export const updateClient = (id: number, data: {
     method: 'PUT',
     body: JSON.stringify(data)
   });
+
+export const assignTemplateToClient = (clientId: number, templateId: number) => 
+  makeRequest(`clients/${clientId}/assign-template`, {
+    method: 'PUT',
+    body: JSON.stringify({ templateId })
+  });
+
+export const removeTemplateFromClient = (clientId: number) => 
+  makeRequest(`clients/${clientId}/assign-template`, {
+    method: 'DELETE'
+  });
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------SESSIONS------------------------------------------------------------------------------------------------
@@ -107,6 +163,19 @@ export const updateClientNextSession = (clientId: number, nextSession: string | 
   makeRequest(`clients/${clientId}`, {
     method: 'PUT',
     body: JSON.stringify({ nextSession })
+  });
+
+export const updateSessionStatus = (id: number, status: string) =>
+  makeRequest(`sessions/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+export const updateSession = (id: number, data: Partial<Session>) =>
+  makeRequest(`sessions/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
   });
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

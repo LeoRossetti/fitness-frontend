@@ -6,6 +6,7 @@ import { Client, Session } from "@/types/types";
 import { Calendar as CalendarIcon, Users, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Avatar } from '@/components/ui/Avatar';
 
 function getTodayISO() {
   const today = new Date();
@@ -64,6 +65,9 @@ export default function DashboardPage() {
     .sort((a, b) => b.sessionCount - a.sessionCount)
     .slice(0, 3);
 
+  const cancelledCount = sessions.filter(s => s.status === 'cancelled').length;
+  const completedCount = sessions.filter(s => s.status === 'completed').length;
+
   return (
     <div className="min-h-screen bg-background-light font-sans p-0 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -74,24 +78,16 @@ export default function DashboardPage() {
             </h1>
             <p className="text-lg text-secondary">Here's what's happening with your clients today.</p>
           </div>
-          <div className="flex gap-3 mt-2 md:mt-0">
-            <Button variant="default">
-              Schedule Session
-            </Button>
-            <Button variant="success" className="flex items-center gap-2 font-semibold">
-              + Add New Client
-            </Button>
-          </div>
         </div>
 
         {/* Top cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           <div className="bg-white rounded-xl shadow-lg p-8 flex items-center justify-between border-t-4 border-main transition hover:shadow-2xl hover:-translate-y-1">
             <div>
               <div className="text-secondary text-sm mb-1">Active Clients</div>
               <div className="text-4xl font-extrabold text-main">{activeClients}</div>
               <div className="text-success text-xs mt-1 flex items-center gap-1">
-                <ArrowUpRight className="w-4 h-4" /> {/* +3 this month */}
+                <ArrowUpRight className="w-4 h-4" />
               </div>
             </div>
             <Users className="w-12 h-12 text-main" />
@@ -103,6 +99,21 @@ export default function DashboardPage() {
               <div className="text-secondary text-xs mt-1">Today: {todaySessions.length}</div>
             </div>
             <CalendarIcon className="w-12 h-12 text-success" />
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-start justify-between border-t-4 border-yellow-400 transition hover:shadow-2xl hover:-translate-y-1">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="inline-block w-3 h-3 rounded-full bg-yellow-400"></span>
+              <span className="text-lg font-semibold text-yellow-600">Cancelled</span>
+            </div>
+            <div className="text-3xl font-extrabold text-yellow-600 mb-2">{cancelledCount}</div>
+            <div className="flex items-center gap-2 text-sm text-secondary mb-4">
+              <span>Completed:</span>
+              <span className="font-bold text-green-600">{completedCount}</span>
+            </div>
+            <div className="flex gap-2 mt-auto">
+              <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">Cancelled</span>
+              <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Completed</span>
+            </div>
           </div>
         </div>
 
@@ -121,14 +132,16 @@ export default function DashboardPage() {
                 return (
                   <li key={s.id} className="flex items-center justify-between py-4 group">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-main/10 flex items-center justify-center text-xl font-bold text-main shadow">
-                        {getInitials(client?.User?.name)}
-                      </div>
+                      <Avatar
+                        name={client?.User?.name || 'Client'}
+                        photoUrl={client?.profile}
+                        size="w-12 h-12"
+                      />
                       <div>
                         <div className="font-semibold text-primary text-lg group-hover:text-main transition">
                           {client?.User?.name || "Client"}
                         </div>
-                        <div className="text-xs text-secondary mt-1">{s.type} | {new Date(s.date).toLocaleString()}</div>
+                        <div className="text-xs text-secondary mt-1">{new Date(s.date).toLocaleString()}</div>
                       </div>
                     </div>
                     <div className="text-right text-sm text-secondary font-mono min-w-[70px]">{s.time}</div>
@@ -147,9 +160,11 @@ export default function DashboardPage() {
             <ul>
               {topClients.map((c, idx) => (
                 <li key={c.id} className="flex items-center gap-4 mb-6 last:mb-0">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shadow-lg ${["bg-accent/20 text-main","bg-main/10 text-main","bg-success/20 text-success"][idx]}`}>
-                    {getInitials(c.User?.name)}
-                  </div>
+                  <Avatar
+                    name={c.User?.name || 'Client'}
+                    photoUrl={c.profile}
+                    size="w-12 h-12"
+                  />
                   <div className="flex-1">
                     <div className="font-semibold text-primary text-lg">{c.User?.name}</div>
                     <div className="w-full bg-background-light rounded-full h-2 mt-2">

@@ -7,6 +7,7 @@ interface ClientCardProps {
   client: Client;
   onDelete: () => void;
   onEdit: (clientId: number) => void;
+  onAssignTemplate: (clientId: number) => void;
   onClick?: () => void;
 }
 
@@ -77,7 +78,7 @@ const getInitials = (name: string | undefined) => {
     .slice(0, 2);
 };
 
-export default function ClientCard({ client, onDelete, onEdit, onClick }: ClientCardProps) {
+export default function ClientCard({ client, onDelete, onEdit, onAssignTemplate, onClick }: ClientCardProps) {
   const nextSession = formatNextSession(client.nextSession);
   const hasNextSession = nextSession !== 'Not scheduled' && nextSession !== 'Invalid date format';
 
@@ -92,14 +93,14 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
       onClick={handleCardClick}
     >
       <div className="flex items-start justify-between">
-        {/* Основная информация */}
+        {/* Main info */}
         <div className="flex items-start gap-4 flex-1">
-          {/* Аватар */}
+          {/* Avatar */}
           <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-lg">
             {getInitials(client.User?.name)}
           </div>
 
-          {/* Информация о клиенте */}
+          {/* Client info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-xl font-bold text-gray-900 truncate">
@@ -111,7 +112,7 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
               </span>
             </div>
 
-            {/* Контактная информация */}
+            {/* Contact info */}
             <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Mail className="h-4 w-4 text-gray-400" />
@@ -125,7 +126,7 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
               )}
             </div>
 
-            {/* Дополнительная информация */}
+            {/* Additional info */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {client.goal && (
                 <div className="flex items-start gap-2">
@@ -188,7 +189,7 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
               )}
             </div>
 
-            {/* Заметки */}
+            {/* Notes */}
             {client.notes && (
               <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Notes</p>
@@ -198,17 +199,23 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
           </div>
         </div>
 
-        {/* Действия */}
+        {/* Actions */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => onEdit(client.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(client.id);
+            }}
             className="flex items-center gap-1 border border-gray-300 text-[#1F2A44] px-2 py-1 cursor-pointer rounded hover:border-gray-500 hover:bg-gray-100 transition-colors"
           >
             <Edit className="h-4 w-4" />
             <span className="text-sm">Edit</span>
           </button>
           <button
-            onClick={onDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
             className="border border-gray-300 text-[#EF4444] p-1 cursor-pointer rounded hover:border-[#EF4444] hover:bg-gray-100 transition-colors"
           >
             <Trash2 className="h-5 w-5" />

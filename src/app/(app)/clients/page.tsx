@@ -4,34 +4,59 @@ import { useEffect, useState } from 'react';
 import ClientCard from './ClientCard';
 import AddClientModal from './AddClientModal';
 import EditClientModal from './EditClientModal';
-import ClientDetailsModal from './ClientDetailsModal';
 import { Client } from '@/types/types';
 import { getClients, deleteClient } from '@/lib/api';
 import { Search, Users, Calendar, Dumbbell, Plus, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
 
 export default function ClientsPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'All' | 'Subscription' | 'Single Session'>('All');
 
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
-  const [viewingClientId, setViewingClientId] = useState<number | null>(null);
+  const [assigningTemplateClientId, setAssigningTemplateClientId] = useState<number | null>(null);
+
+  const router = useRouter();
 
   const fetchClients = async () => {
     try {
+      setError(null); // Сбрасываем ошибку при новой попытке
       const data = await getClients();
       setClients(data);
       setFilteredClients(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch clients:', error);
+      
+      // Устанавливаем сообщение об ошибке
+      let errorMessage = 'Failed to load clients. Please try again.';
+      
+      // Показываем пользователю более информативное сообщение об ошибке
+      if (error.message.includes('401')) {
+        errorMessage = 'Please log in to access this page';
+        toast.error(errorMessage);
+        // Перенаправляем на главную страницу для входа
+        window.location.href = '/';
+      } else if (error.message.includes('500')) {
+        errorMessage = 'Server error. Please try again later or contact support.';
+        toast.error(errorMessage);
+      } else if (error.message.includes('Network error')) {
+        errorMessage = 'Connection error. Please check your internet connection.';
+        toast.error(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -154,6 +179,10 @@ export default function ClientsPage() {
     setEditingClientId(clientId);
   };
 
+  const handleAssignTemplate = (clientId: number) => {
+    setAssigningTemplateClientId(clientId);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -220,8 +249,33 @@ export default function ClientsPage() {
           </div>
         </div>
 
+        {/* Отображение ошибки */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-red-600 text-sm font-bold">!</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-red-800 font-medium">Error loading clients</p>
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  fetchClients();
+                }}
+                className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
-          {filteredClients.length === 0 ? (
+          {!error && filteredClients.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-gray-400" />
@@ -247,13 +301,14 @@ export default function ClientsPage() {
               )}
             </div>
           ) : (
-            filteredClients.map(client => (
+            !error && filteredClients.map(client => (
               <ClientCard
                 key={client.id}
                 client={client}
                 onDelete={() => handleDeleteClient(client.id)}
                 onEdit={() => handleEdit(client.id)}
-                onClick={() => setViewingClientId(client.id)}
+                onAssignTemplate={() => handleAssignTemplate(client.id)}
+                onClick={() => router.push(`/clients/${client.id}`)}
               />
             ))
           )}
@@ -266,16 +321,6 @@ export default function ClientsPage() {
         onClose={() => setIsOpen(false)}
         onClientAdded={handleAddClient}
       />
-
-      {/* Модалка просмотра клиента */}
-      {viewingClientId !== null && (
-        <ClientDetailsModal
-          isOpen={viewingClientId !== null}
-          onClose={() => setViewingClientId(null)}
-          clientId={viewingClientId}
-          onEdit={handleEdit}
-        />
-      )}
 
       {/* Модалка редактирования клиента */}
       {editingClientId !== null && (
