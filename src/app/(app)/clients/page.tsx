@@ -24,7 +24,6 @@ export default function ClientsPage() {
   const [filter, setFilter] = useState<'All' | 'Subscription' | 'Single Session'>('All');
 
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
-  const [assigningTemplateClientId, setAssigningTemplateClientId] = useState<number | null>(null);
 
   const router = useRouter();
 
@@ -179,10 +178,6 @@ export default function ClientsPage() {
     setEditingClientId(clientId);
   };
 
-  const handleAssignTemplate = (clientId: number) => {
-    setAssigningTemplateClientId(clientId);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -307,29 +302,30 @@ export default function ClientsPage() {
                 client={client}
                 onDelete={() => handleDeleteClient(client.id)}
                 onEdit={() => handleEdit(client.id)}
-                onAssignTemplate={() => handleAssignTemplate(client.id)}
                 onClick={() => router.push(`/clients/${client.id}`)}
               />
             ))
           )}
         </div>
-      </div>
 
-      {/* Добавление клиента */}
-      <AddClientModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        onClientAdded={handleAddClient}
-      />
-
-      {/* Модалка редактирования клиента */}
-      {editingClientId !== null && (
-        <EditClientModal
-          clientId={editingClientId}
-          onClose={() => setEditingClientId(null)}
-          onUpdated={() => setRefreshTrigger(prev => prev + 1)}
+        {/* Модальные окна */}
+        <AddClientModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          onClientAdded={handleAddClient}
         />
-      )}
+
+        {editingClientId && (
+          <EditClientModal
+            clientId={editingClientId}
+            onClose={() => setEditingClientId(null)}
+            onUpdated={() => {
+              setEditingClientId(null);
+              setRefreshTrigger(prev => prev + 1);
+            }}
+          />
+        )}
+      </div>
     </main>
   );
 }

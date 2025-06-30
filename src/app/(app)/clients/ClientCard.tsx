@@ -7,7 +7,6 @@ interface ClientCardProps {
   client: Client;
   onDelete: () => void;
   onEdit: (clientId: number) => void;
-  onAssignTemplate: (clientId: number) => void;
   onClick?: () => void;
 }
 
@@ -78,7 +77,7 @@ const getInitials = (name: string | undefined) => {
     .slice(0, 2);
 };
 
-export default function ClientCard({ client, onDelete, onEdit, onAssignTemplate, onClick }: ClientCardProps) {
+export default function ClientCard({ client, onDelete, onEdit, onClick }: ClientCardProps) {
   const nextSession = formatNextSession(client.nextSession);
   const hasNextSession = nextSession !== 'Not scheduled' && nextSession !== 'Invalid date format';
 

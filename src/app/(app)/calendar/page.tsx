@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { Plus, Clock, User, Calendar as CalendarIcon, StickyNote } from 'lucide-react';
+import { Plus, Clock, Calendar as CalendarIcon, } from 'lucide-react';
 import { getClients, createSession, getSessionsByMonth, deleteSession, updateClientNextSession, updateSessionStatus, getWorkoutTemplates, updateSession } from '@/lib/api';
 import 'react-day-picker/dist/style.css';
 import { Modal } from '@/components/ui/modal';
@@ -12,9 +12,8 @@ import { Select } from '@/components/ui/select';
 import { TextField } from '@/components/ui/textfield';
 import { isSameDay } from 'date-fns';
 import { toast } from 'react-hot-toast';
-import { Session, WorkoutTemplate, ServerWorkoutTemplate } from '@/types/types';
+import { Session, ServerWorkoutTemplate } from '@/types/types';
 import { Avatar } from '@/components/ui/Avatar';
-import WorkoutTemplateCard from '../workout_templates/WorkoutTemplateCard';
 import SessionDetailsModal from './SessionDetailsModal';
 
 // Helper function for status color
