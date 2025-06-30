@@ -15,6 +15,9 @@ export interface Client extends Omit<User, "role"> {
   plan?: "Premium Monthly" | "Standard Weekly" | "Single Session";
   type: "Subscription" | "One-time";
   nextSession?: string;
+  age?: number;
+  height?: number;
+  weight?: number;
   role: "Client";
   User?: {
     name: string;
@@ -47,14 +50,22 @@ export type CreateExerciseData = Omit<Exercise, "id" | "createdAt" | "updatedAt"
 export interface Session {
   id: number;
   clientId: number;        // ID клиента
-  type: string;            // Тип тренировки (например: "Силовая", "Кардио")
   time: string;            // Время тренировки (например: "14:00")
   note: string;            // Заметки тренера
   date: string;            // Дата тренировки (формат: "2024-01-15")
+  duration?: number;       // Продолжительность сессии в минутах
+  status?: 'scheduled' | 'completed' | 'cancelled' | 'no_show'; // Статус сессии
   createdAt?: string;      // Дата создания записи
   updatedAt?: string;      // Дата обновления записи
-  // Связь с клиентом (может быть загружена с сервера)
   client?: Client;
+  WorkoutTemplate?: {
+    id: number;
+    name: string;
+    category?: string;
+    description?: string;
+  };
+  // Для поддержки данных с backend:
+  Client?: Client;
 }
 
 // Типы для создания сессии (без id и дат)
@@ -79,6 +90,8 @@ export interface WorkoutTemplate {
   category?: string;               // Категория (например: "Силовая", "Кардио")
   createdAt?: string;              // Дата создания
   updatedAt?: string;              // Дата обновления
+  // Для поддержки данных с backend:
+  Exercises?: ServerWorkoutExercise[];
 }
 
 // Тип для упражнения в шаблоне от сервера (с дополнительными полями)

@@ -23,6 +23,7 @@ const config: Config = {
         },
         background: {
           light: '#F3F4F6',
+          DEFAULT: '#FFFFFF',
         },
         primary: '#1F2A44',    // темно-синий - для заголовков
         secondary: '#6B7280',  // серый - для описаний
@@ -30,6 +31,15 @@ const config: Config = {
         accent: '#8B5CF6',     // вместо bg-[#8B5CF6] - для активных элементов
         success: '#10B981',    // вместо bg-[#10B981] - для успешных действий
         danger: '#EF4444',     // вместо text-[#EF4444] - для ошибок/удаления
+        // Form colors
+        foreground: '#1F2A44',
+        muted: {
+          DEFAULT: '#6B7280',
+          foreground: '#9CA3AF',
+        },
+        input: '#E5E7EB',
+        ring: '#7c3aed',
+        'ring-offset-background': '#FFFFFF',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

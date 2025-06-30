@@ -6,8 +6,8 @@ import { Search, Plus, Dumbbell, Heart, User, Activity, Filter } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getWorkoutTemplates, deleteWorkoutTemplate } from '@/lib/api';
-import WorkoutTemplateCard from '@/components/workouts/WorkoutTemplateCard';
-import EditWorkoutTemplateModal from '@/components/workouts/EditWorkoutTemplateModal';
+import WorkoutTemplateCard from './WorkoutTemplateCard';
+import EditWorkoutTemplateModal from './EditWorkoutTemplateModal';
 import toast from 'react-hot-toast';
 import { ServerWorkoutTemplate } from '@/types/types';
 
@@ -19,6 +19,7 @@ export default function WorkoutTemplatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'All' | 'Strength' | 'Cardio' | 'Flexibility' | 'Bodyweight'>('All');
   const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null);
+  const [assigningTemplate, setAssigningTemplate] = useState<ServerWorkoutTemplate | null>(null);
 
   const handleCreateNewTemplate = () => {
     router.push('/workouts');
@@ -86,6 +87,10 @@ export default function WorkoutTemplatesPage() {
 
   const handleEdit = (templateId: number) => {
     setEditingTemplateId(templateId);
+  };
+
+  const handleAssign = (template: ServerWorkoutTemplate) => {
+    setAssigningTemplate(template);
   };
 
   const handleDelete = async (templateId: number) => {
@@ -197,6 +202,7 @@ export default function WorkoutTemplatesPage() {
               template={template}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onAssign={handleAssign}
             />
           ))}
         </div>
@@ -218,6 +224,7 @@ export default function WorkoutTemplatesPage() {
           onUpdated={handleTemplateUpdated}
         />
       )}
+
     </main>
   );
 } 

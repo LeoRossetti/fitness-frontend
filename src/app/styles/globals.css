@@ -20,6 +20,15 @@
 
   /* Border colors */
   --border: #E5E7EB;
+
+  /* Form colors */
+  --background: #FFFFFF;
+  --foreground: #1F2A44;
+  --muted: #6B7280;
+  --muted-foreground: #9CA3AF;
+  --border-input: #E5E7EB;
+  --ring: #7c3aed;
+  --ring-offset-background: #FFFFFF;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -66,4 +75,24 @@ body {
 }
 .hover\:border-primary:hover {
   border-color: var(--text-primary);
+}
+
+/* Form utilities */
+.bg-background {
+  background-color: var(--background);
+}
+.text-foreground {
+  color: var(--foreground);
+}
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+.border-input {
+  border-color: var(--border-input);
+}
+.ring-ring {
+  --tw-ring-color: var(--ring);
+}
+.ring-offset-background {
+  --tw-ring-offset-color: var(--ring-offset-background);
 }

@@ -7,9 +7,10 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'custom';
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, size = 'lg' }: ModalProps) {
   const [closing, setClosing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isBackdropClicked, setIsBackdropClicked] = useState(false);
@@ -45,6 +46,15 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     setIsMouseDown(false);
   };
 
+  const sizeClass = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    custom: 'max-w-3xl min-h-[32rem] max-h-[90vh]',
+  }[size ?? 'lg'];
+
   if (!isOpen) return null;
 
   return (
@@ -56,9 +66,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       onMouseUp={handleBackdropMouseUp}
     >
       <div
-        className={`relative w-full max-w-md bg-white rounded-lg shadow-xl p-8 transform transition-all duration-300 ${
+        className={`relative w-full sm:w-auto min-w-[22rem] ${sizeClass} bg-white rounded-lg shadow-xl transform transition-all duration-300 ${
           closing || !mounted ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-        }`}
+        } p-8`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button

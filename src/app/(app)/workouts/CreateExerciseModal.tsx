@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { TextField } from "@/components/ui/textfield";
 import { Modal } from "@/components/ui/modal";
 import { createExercise } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -86,7 +88,6 @@ export default function CreateExerciseModal({
             value={formData.name}
             onChange={(e) => handleInputChange("name", e.target.value)}
             placeholder="e.g. Push-ups, Squats, Deadlift"
-            className="bg-gray-50 border-gray-200 focus:border-violet-500 focus:ring-violet-500"
             required
           />
         </div>
@@ -95,11 +96,10 @@ export default function CreateExerciseModal({
           <label className="text-sm font-medium text-gray-700 mb-2 block">
             Description *
           </label>
-          <textarea
+          <TextField
             value={formData.description}
             onChange={(e) => handleInputChange("description", e.target.value)}
             placeholder="Describe how to perform this exercise..."
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-violet-500 focus:ring-violet-500 bg-gray-50 resize-none"
             rows={3}
             required
           />
@@ -109,30 +109,28 @@ export default function CreateExerciseModal({
           <label className="text-sm font-medium text-gray-700 mb-2 block">
             Category
           </label>
-          <select
+          <Select
             value={formData.category}
             onChange={(e) => handleInputChange("category", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-violet-500 focus:ring-violet-500 bg-gray-50"
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
           <label className="text-sm font-medium text-gray-700 mb-2 block">
             Muscle Group
           </label>
-          <select
+          <Select
             value={formData.muscleGroup}
             onChange={(e) => handleInputChange("muscleGroup", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-violet-500 focus:ring-violet-500 bg-gray-50"
           >
             {muscleGroups.map(group => (
               <option key={group} value={group}>{group}</option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div className="flex gap-3 pt-4">
