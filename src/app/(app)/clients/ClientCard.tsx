@@ -147,15 +147,7 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
                 </div>
               </div>
 
-              {client.type && (
-                <div className="flex items-start gap-2">
-                  <User className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</p>
-                    <p className="text-sm text-gray-700">{client.type}</p>
-                  </div>
-                </div>
-              )}
+
 
               {client.age && (
                 <div className="flex items-start gap-2">

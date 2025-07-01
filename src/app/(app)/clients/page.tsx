@@ -29,33 +29,33 @@ export default function ClientsPage() {
 
   const fetchClients = async () => {
     try {
-      setError(null); // Сбрасываем ошибку при новой попытке
+      setError(null);
+      setLoading(true);
       const data = await getClients();
       setClients(data);
       setFilteredClients(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to fetch clients:', error);
       
-      // Устанавливаем сообщение об ошибке
       let errorMessage = 'Failed to load clients. Please try again.';
       
-      // Показываем пользователю более информативное сообщение об ошибке
-      if (error.message.includes('401')) {
-        errorMessage = 'Please log in to access this page';
-        toast.error(errorMessage);
-        // Перенаправляем на главную страницу для входа
-        window.location.href = '/';
-      } else if (error.message.includes('500')) {
-        errorMessage = 'Server error. Please try again later or contact support.';
-        toast.error(errorMessage);
-      } else if (error.message.includes('Network error')) {
-        errorMessage = 'Connection error. Please check your internet connection.';
-        toast.error(errorMessage);
-      } else {
-        toast.error(errorMessage);
+      if (error instanceof Error) {
+        if (error.message.includes('500')) {
+          errorMessage = 'Server error. The backend service might be temporarily unavailable. Please try again later.';
+        } else if (error.message.includes('401')) {
+          errorMessage = 'Please log in to access this page';
+          toast.error(errorMessage);
+          window.location.href = '/';
+          return;
+        } else if (error.message.includes('Network error')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
       }
       
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -246,26 +246,14 @@ export default function ClientsPage() {
 
         {/* Отображение ошибки */}
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 text-sm font-bold">!</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-red-800 font-medium">Error loading clients</p>
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-              <button
-                onClick={() => {
-                  setError(null);
-                  setLoading(true);
-                  fetchClients();
-                }}
-                className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
-              >
-                Retry
-              </button>
-            </div>
+          <div className="text-center py-8">
+            <div className="text-red-600 mb-4">{error}</div>
+            <Button 
+              onClick={fetchClients}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Try Again
+            </Button>
           </div>
         )}
 

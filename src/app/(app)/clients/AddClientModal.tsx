@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
-import { TextField } from '@/components/ui/textfield';
 import { Modal } from '@/components/ui/modal';
 import toast from 'react-hot-toast';
 
@@ -19,15 +17,7 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
-    address: '',
-    goal: '',
-    plan: 'Standard Weekly' as const,
-    type: 'Subscription' as const,
-    age: '',
-    height: '',
-    weight: '',
-    notes: ''
+    phone: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,25 +25,19 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
     setLoading(true);
 
     try {
-      // Подготавливаем данные, конвертируя числовые поля
-      const submitData = {
-        ...formData,
-        age: formData.age ? parseInt(formData.age) : undefined,
-        height: formData.height ? parseInt(formData.height) : undefined,
-        weight: formData.weight ? parseInt(formData.weight) : undefined,
-      };
-
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clients`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submitData),
+        body: JSON.stringify(formData),
       });
 
       if (res.ok) {
         onClose();
         onClientAdded?.();
         toast.success('Client added successfully');
+        // Сбрасываем форму
+        setFormData({ name: '', email: '', phone: '' });
       } else {
         toast.error('Failed to add client');
       }
@@ -65,19 +49,24 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
+  const handleClose = () => {
+    setFormData({ name: '', email: '', phone: '' });
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" title="Add New Client">
-      <form onSubmit={handleSubmit} className="space-y-4 min-w-[28rem]">
+    <Modal isOpen={isOpen} onClose={handleClose} size="md" title="Add New Client">
+      <form onSubmit={handleSubmit} className="space-y-4 min-w-[24rem]">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-primary mb-2">
-            Name
+            Name <span className="text-red-500">*</span>
           </label>
           <Input
             id="name"
@@ -91,7 +80,7 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
         </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-primary mb-2">
-            Email
+            Email <span className="text-red-500">*</span>
           </label>
           <Input
             id="email"
@@ -116,115 +105,8 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
             placeholder="+1 (555) 000-0000"
           />
         </div>
-        <div>
-          <label htmlFor="address" className="block text-sm font-medium text-primary mb-2">
-            Address
-          </label>
-          <Input
-            id="address"
-            name="address"
-            type="text"
-            value={formData.address}
-            onChange={handleChange}
-            placeholder="123 Main St, City, Country"
-          />
-        </div>
-        <div>
-          <label htmlFor="goal" className="block text-sm font-medium text-primary mb-2">
-            Fitness Goals
-          </label>
-          <TextField
-            id="goal"
-            name="goal"
-            value={formData.goal}
-            onChange={handleChange}
-            rows={3}
-            placeholder="Enter client's fitness goals..."
-          />
-        </div>
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-primary mb-2">
-            Notes
-          </label>
-          <TextField
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            rows={3}
-            placeholder="Additional notes about the client..."
-          />
-        </div>
-        <div>
-          <label htmlFor="plan" className="block text-sm font-medium text-primary mb-2">
-            Plan
-          </label>
-          <Select
-            id="plan"
-            name="plan"
-            value={formData.plan}
-            onChange={handleChange}
-          >
-            <option value="Premium Monthly">Premium Monthly</option>
-            <option value="Standard Weekly">Standard Weekly</option>
-            <option value="Single Session">Single Session</option>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="type" className="block text-sm font-medium text-primary mb-2">
-            Type
-          </label>
-          <Select
-            id="type"
-            name="type"
-            value={formData.type}
-            onChange={handleChange}
-          >
-            <option value="Subscription">Subscription</option>
-            <option value="One-time">One-time</option>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="age" className="block text-sm font-medium text-primary mb-2">
-            Age
-          </label>
-          <Input
-            id="age"
-            name="age"
-            type="text"
-            value={formData.age}
-            onChange={handleChange}
-            placeholder="Enter client's age"
-          />
-        </div>
-        <div>
-          <label htmlFor="height" className="block text-sm font-medium text-primary mb-2">
-            Height
-          </label>
-          <Input
-            id="height"
-            name="height"
-            type="text"
-            value={formData.height}
-            onChange={handleChange}
-            placeholder="Enter client's height"
-          />
-        </div>
-        <div>
-          <label htmlFor="weight" className="block text-sm font-medium text-primary mb-2">
-            Weight
-          </label>
-          <Input
-            id="weight"
-            name="weight"
-            type="text"
-            value={formData.weight}
-            onChange={handleChange}
-            placeholder="Enter client's weight"
-          />
-        </div>
         <div className="flex gap-3">
-          <Button type="button" variant="danger" className="flex-1" onClick={onClose}>
+          <Button type="button" variant="danger" className="flex-1" onClick={handleClose}>
             Cancel
           </Button>
           <Button type="submit" className="flex-1" disabled={loading}>

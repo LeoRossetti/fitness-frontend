@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Dumbbell, LayoutDashboard, Users, BarChart2, Calendar, ChevronLeft, ChevronRight, Menu, FileText, LogOut } from 'lucide-react';
+import { Dumbbell, LayoutDashboard, Users, Calendar, ChevronLeft, ChevronRight, Menu, FileText, LogOut } from 'lucide-react';
 import { useContext, useState, useEffect } from 'react';
 import { SidebarContext } from '@/components/layout/SidebarProvider';
 
@@ -92,14 +92,6 @@ export default function Sidebar() {
               icon={<FileText size={20} />}
               label="Templates"
               active={pathname === '/workout_templates'}
-              collapsed={false}
-              onMobileItemClick={() => setIsMobileMenuOpen(false)}
-            />
-            <SidebarItem
-              href="/progress"
-              icon={<BarChart2 size={20} />}
-              label="Progress"
-              active={pathname === '/progress'}
               collapsed={false}
               onMobileItemClick={() => setIsMobileMenuOpen(false)}
             />
@@ -194,14 +186,6 @@ export default function Sidebar() {
             icon={<FileText size={20} />}
             label="Templates"
             active={pathname === '/workout_templates'}
-            collapsed={collapsed}
-            onMobileItemClick={() => setIsMobileMenuOpen(false)}
-          />
-          <SidebarItem
-            href="/progress"
-            icon={<BarChart2 size={20} />}
-            label="Progress"
-            active={pathname === '/progress'}
             collapsed={collapsed}
             onMobileItemClick={() => setIsMobileMenuOpen(false)}
           />

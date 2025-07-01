@@ -26,7 +26,6 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     address: '',
     goal: '',
     plan: 'Standard Weekly' as const,
-    type: 'Subscription' as const,
     age: '',
     height: '',
     weight: '',
@@ -46,7 +45,6 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
           address: data.address || '',
           goal: data.goal || '',
           plan: data.plan || 'Standard Weekly',
-          type: data.type || 'Subscription',
           age: data.age || '',
           height: data.height || '',
           weight: data.weight || '',
@@ -88,7 +86,6 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
         address: formData.address,
         notes: formData.notes,
         plan: formData.plan,
-        type: formData.type,
         age: formData.age ? parseInt(formData.age) : undefined,
         height: formData.height ? parseInt(formData.height) : undefined,
         weight: formData.weight ? parseInt(formData.weight) : undefined,
@@ -214,20 +211,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
             <option value="Single Session">Single Session</option>
           </Select>
         </div>
-        <div>
-          <label htmlFor="type" className="block text-sm font-medium text-primary mb-2">
-            Type
-          </label>
-          <Select
-            id="type"
-            name="type"
-            value={formData.type}
-            onChange={handleChange}
-          >
-            <option value="Subscription">Subscription</option>
-            <option value="One-time">One-time</option>
-          </Select>
-        </div>
+
         <div>
           <label htmlFor="age" className="block text-sm font-medium text-primary mb-2">
             Age

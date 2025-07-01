@@ -13,7 +13,7 @@ export interface Client extends Omit<User, "role"> {
   notes?: string;
   profile?: string;
   plan?: "Premium Monthly" | "Standard Weekly" | "Single Session";
-  type: "Subscription" | "One-time";
+  type?: "Subscription" | "One-time";
   nextSession?: string;
   age?: number;
   height?: number;
