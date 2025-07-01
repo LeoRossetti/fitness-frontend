@@ -188,30 +188,8 @@ export default function WorkoutPlan({
     <div className="bg-white rounded-xl shadow-lg p-6 w-[500px]">
       <h2 className="text-xl font-bold text-gray-900 mb-6">Workout Plan</h2>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={exercises.map(ex => ex.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="space-y-4">
-            {exercises.map((exercise, index) => (
-              <SortableExerciseItem
-                key={exercise.id}
-                exercise={exercise}
-                index={index}
-                onUpdateExercise={onUpdateExercise}
-                onRemoveExercise={onRemoveExercise}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-
-      <div className="mt-8 pt-6 border-t border-gray-100">
+      {/* Блок с названием и кнопками вверху */}
+      <div className="mb-6 pb-6 border-b border-gray-100">
         <Input
           value={planName}
           onChange={(e) => setPlanName(e.target.value)}
@@ -238,6 +216,31 @@ export default function WorkoutPlan({
           )}
         </div>
       </div>
+
+      {/* Список упражнений */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={exercises.map(ex => ex.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-4">
+            {exercises.map((exercise, index) => (
+              <SortableExerciseItem
+                key={exercise.id}
+                exercise={exercise}
+                index={index}
+                onUpdateExercise={onUpdateExercise}
+                onRemoveExercise={onRemoveExercise}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+
     </div>
   );
 } 

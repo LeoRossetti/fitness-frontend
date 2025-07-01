@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { getClientById, getSessionsByMonth } from '@/lib/api';
+import { getClientById, getSessionsByMonth, updateClient } from '@/lib/api';
 import { Avatar } from '@/components/ui/Avatar';
-import { User, Mail, Phone, MapPin, Crown, Calendar, Clock, TrendingUp, Activity, FileText } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Crown, Calendar, Clock, TrendingUp, Activity, FileText, Check, X, Pencil } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
 
 const getPlanColor = (plan: string | undefined) => {
   switch (plan) {
@@ -45,6 +49,187 @@ const statusLabelMap: Record<string, string> = {
   no_show: 'No show',
 };
 
+function InlineEditField({
+  value,
+  placeholder,
+  type = 'text',
+  options,
+  onSave,
+  className = '',
+}: {
+  value: string | number | undefined;
+  placeholder: string;
+  type?: 'text' | 'number' | 'select';
+  options?: { value: string; label: string }[];
+  onSave: (newValue: any) => Promise<void>;
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(value ?? '');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setInputValue(value ?? '');
+  }, [value]);
+
+  const handleSave = async () => {
+    setLoading(true);
+    await onSave(inputValue);
+    setLoading(false);
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <span className={className}>
+        {type === 'select' && options ? (
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
+            disabled={loading}
+          >
+            {options.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            className="border rounded px-2 py-1 text-sm"
+            type={type}
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
+            disabled={loading}
+            autoFocus
+          />
+        )}
+        <button onClick={handleSave} className="ml-2 text-green-600" disabled={loading}><Check size={16} /></button>
+        <button onClick={() => setEditing(false)} className="ml-1 text-gray-400"><X size={16} /></button>
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 group cursor-pointer ${className}`}
+      onClick={() => setEditing(true)}
+      tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter') setEditing(true); }}
+    >
+      {value !== undefined && value !== '' ? (
+        <span>{value}</span>
+      ) : (
+        <span className="text-gray-400 italic">{placeholder}</span>
+      )}
+      <Pencil size={14} className="opacity-60 group-hover:opacity-100 transition-opacity ml-1" />
+    </span>
+  );
+}
+
+function EditableSection({
+  fields,
+  values,
+  labels,
+  types,
+  options,
+  onSave,
+  sectionTitle,
+  icon,
+  className = '',
+}: {
+  fields: string[];
+  values: Record<string, any>;
+  labels: Record<string, string>;
+  types?: Record<string, 'text' | 'number' | 'select'>;
+  options?: Record<string, { value: string; label: string }[]>;
+  onSave: (newValues: Record<string, any>) => Promise<void>;
+  sectionTitle: string;
+  icon?: React.ReactNode;
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setForm(fields.reduce((acc, f) => ({ ...acc, [f]: values[f] ?? '' }), {}));
+  }, [values, fields]);
+
+  const handleChange = (f: string, v: any) => {
+    setForm(prev => ({ ...prev, [f]: v }));
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    await onSave(form);
+    setLoading(false);
+    setEditing(false);
+  };
+
+  return (
+    <section className={`border border-gray-100 bg-white rounded-xl p-6 ${className}`}>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+          {icon}
+          {sectionTitle}
+        </h3>
+        {!editing && (
+          <button className="text-violet-600 hover:underline text-sm flex items-center gap-1" onClick={() => setEditing(true)}>
+            <Pencil size={16} /> Edit
+          </button>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 text-gray-700">
+        {fields.map(f => (
+          <div key={f} className="flex items-center gap-3">
+            <span className="min-w-[80px] font-medium">{labels[f]}:</span>
+            {editing ? (
+              types && types[f] === 'select' && options && options[f] ? (
+                <Select
+                  id={f}
+                  name={f}
+                  value={form[f]}
+                  onChange={e => handleChange(f, e.target.value)}
+                  className="pr-10"
+                  disabled={loading}
+                >
+                  <option value="">—</option>
+                  {options[f].map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </Select>
+              ) : (
+                <Input
+                  id={f}
+                  name={f}
+                  type={types && types[f] ? types[f] : 'text'}
+                  value={form[f]}
+                  onChange={e => handleChange(f, e.target.value)}
+                  disabled={loading}
+                />
+              )
+            ) : (
+              <span className={form[f] ? '' : 'text-gray-400 italic'}>
+                {form[f] ? form[f] : `Add ${labels[f].toLowerCase()}`}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+      {editing && (
+        <div className="flex gap-2 pt-4">
+          <Button type="button" variant="success" onClick={handleSave} disabled={loading}>
+            Save
+          </Button>
+          <Button type="button" variant="danger" onClick={() => setEditing(false)} disabled={loading}>
+            Cancel
+          </Button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function ClientDetailsPage() {
   const params = useParams();
   const clientId = Number(params.id);
@@ -67,6 +252,20 @@ export default function ClientDetailsPage() {
       .finally(() => setLoading(false));
   }, [clientId]);
 
+  // Функция для обновления нескольких полей клиента
+  const handleSectionSave = async (fields: string[], newValues: Record<string, any>) => {
+    // Собираем только изменяемые поля в плоском формате
+    const updateData: Record<string, any> = {};
+    fields.forEach(f => {
+      if (newValues[f] !== undefined) updateData[f] = newValues[f];
+    });
+    await updateClient(client.id, updateData);
+    // После успешного обновления — повторно получить клиента с сервера
+    const freshClient = await getClientById(client.id);
+    setClient(freshClient);
+    toast.success('Changes saved');
+  };
+
   if (loading) return <div className="text-center py-10">Loading...</div>;
   if (!client) return <div className="text-center py-10">Client not found</div>;
 
@@ -88,7 +287,6 @@ export default function ClientDetailsPage() {
       {/* Plan */}
       <div className="mb-8">
         <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${getPlanColor(client.plan)}`}>
-            
           {getPlanIcon(client.plan)}
           {client.plan || 'No plan'}
         </span>
@@ -121,41 +319,55 @@ export default function ClientDetailsPage() {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Contact Info */}
-            <section className="border border-gray-100 bg-white rounded-xl p-6">
-              <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2 mb-2">
-                <User className="h-5 w-5 text-violet-500" />
-                Contact Information
-              </h3>
-              <div className="flex flex-col gap-2 text-gray-700">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-gray-400" />
-                  <span className="break-all">{client.User?.email}</span>
-                </div>
-                {client.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-gray-400" />
-                    <span className="break-all">{client.phone}</span>
-                  </div>
-                )}
-                {client.address && (
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                    <span className="break-all">{client.address}</span>
-                  </div>
-                )}
-              </div>
-            </section>
+            <EditableSection
+              fields={['email', 'phone', 'address']}
+              values={{
+                email: client.User?.email,
+                phone: client.phone,
+                address: client.address,
+              }}
+              labels={{
+                email: 'Email',
+                phone: 'Phone',
+                address: 'Address',
+              }}
+              onSave={vals => handleSectionSave(['email', 'phone', 'address'], vals)}
+              sectionTitle="Contact Information"
+              icon={<User className="h-5 w-5 text-violet-500" />}
+            />
             {/* Main Info */}
-            <section className="border border-gray-100 bg-white rounded-xl p-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Main Information</h3>
-              <div className="grid grid-cols-1 gap-2">
-                <div><span className="font-medium">Goal:</span> {client.goal || '—'}</div>
-                <div><span className="font-medium">Type:</span> {client.type || '—'}</div>
-                <div><span className="font-medium">Age:</span> {client.age || '—'}</div>
-                <div><span className="font-medium">Height:</span> {client.height || '—'}</div>
-                <div><span className="font-medium">Weight:</span> {client.weight || '—'}</div>
-              </div>
-            </section>
+            <EditableSection
+              fields={['goal', 'plan', 'age', 'height', 'weight']}
+              values={{
+                goal: client.goal,
+                plan: client.plan,
+                age: client.age,
+                height: client.height,
+                weight: client.weight,
+              }}
+              labels={{
+                goal: 'Goal',
+                plan: 'Plan',
+                age: 'Age',
+                height: 'Height',
+                weight: 'Weight',
+              }}
+              types={{
+                plan: 'select',
+                age: 'number',
+                height: 'number',
+                weight: 'number',
+              }}
+              options={{
+                plan: [
+                  { value: 'Premium Monthly', label: 'Premium Monthly' },
+                  { value: 'Standard Weekly', label: 'Standard Weekly' },
+                  { value: 'Single Session', label: 'Single Session' },
+                ],
+              }}
+              onSave={vals => handleSectionSave(['goal', 'plan', 'age', 'height', 'weight'], vals)}
+              sectionTitle="Main Information"
+            />
           </div>
         )}
         {activeTab === 'sessions' && (

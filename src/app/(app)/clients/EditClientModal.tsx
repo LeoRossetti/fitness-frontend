@@ -23,13 +23,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     name: '',
     email: '',
     phone: '',
-    address: '',
-    goal: '',
     plan: 'Standard Weekly' as const,
-    age: '',
-    height: '',
-    weight: '',
-    notes: ''
   });
 
   useEffect(() => {
@@ -42,13 +36,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
           name: data.User?.name || '',
           email: data.User?.email || '',
           phone: data.phone || '',
-          address: data.address || '',
-          goal: data.goal || '',
           plan: data.plan || 'Standard Weekly',
-          age: data.age || '',
-          height: data.height || '',
-          weight: data.weight || '',
-          notes: data.notes || '',
         });
       } catch (error) {
         console.error("Failed to fetch client:", error);
@@ -63,7 +51,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     fetchClient();
   }, [clientId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -75,26 +63,13 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     setLoading(true);
 
     try {
-      // Структурируем данные правильно для API
       const updateData = {
-        User: {
-          name: formData.name,
-          email: formData.email
-        },
+        name: formData.name,
+        email: formData.email,
         phone: formData.phone,
-        goal: formData.goal,
-        address: formData.address,
-        notes: formData.notes,
         plan: formData.plan,
-        age: formData.age ? parseInt(formData.age) : undefined,
-        height: formData.height ? parseInt(formData.height) : undefined,
-        weight: formData.weight ? parseInt(formData.weight) : undefined,
       };
-
-      console.log('Sending update data:', updateData);
       const updatedClient = await updateClient(clientId, updateData);
-      console.log('Client updated successfully:', updatedClient);
-      
       onUpdated?.(updatedClient);
       onClose();
       toast.success('Client updated successfully');
@@ -118,7 +93,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
       <form onSubmit={handleSubmit} className="space-y-4 min-w-[28rem]">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-primary mb-2">
-            Name
+            Name <span className="text-red-500">*</span>
           </label>
           <Input
             id="name"
@@ -132,7 +107,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
         </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-primary mb-2">
-            Email
+            Email <span className="text-red-500">*</span>
           </label>
           <Input
             id="email"
@@ -158,45 +133,6 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
           />
         </div>
         <div>
-          <label htmlFor="address" className="block text-sm font-medium text-primary mb-2">
-            Address
-          </label>
-          <Input
-            id="address"
-            name="address"
-            type="text"
-            value={formData.address}
-            onChange={handleChange}
-            placeholder="123 Main St, City, Country"
-          />
-        </div>
-        <div>
-          <label htmlFor="goal" className="block text-sm font-medium text-primary mb-2">
-            Fitness Goals
-          </label>
-          <TextField
-            id="goal"
-            name="goal"
-            value={formData.goal}
-            onChange={handleChange}
-            rows={3}
-            placeholder="Enter client's fitness goals..."
-          />
-        </div>
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-primary mb-2">
-            Notes
-          </label>
-          <TextField
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            rows={3}
-            placeholder="Additional notes about the client..."
-          />
-        </div>
-        <div>
           <label htmlFor="plan" className="block text-sm font-medium text-primary mb-2">
             Plan
           </label>
@@ -210,46 +146,6 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
             <option value="Standard Weekly">Standard Weekly</option>
             <option value="Single Session">Single Session</option>
           </Select>
-        </div>
-
-        <div>
-          <label htmlFor="age" className="block text-sm font-medium text-primary mb-2">
-            Age
-          </label>
-          <Input
-            id="age"
-            name="age"
-            type="text"
-            value={formData.age}
-            onChange={handleChange}
-            placeholder="e.g., 25"
-          />
-        </div>
-        <div>
-          <label htmlFor="height" className="block text-sm font-medium text-primary mb-2">
-            Height
-          </label>
-          <Input
-            id="height"
-            name="height"
-            type="text"
-            value={formData.height}
-            onChange={handleChange}
-            placeholder="e.g., 180 cm"
-          />
-        </div>
-        <div>
-          <label htmlFor="weight" className="block text-sm font-medium text-primary mb-2">
-            Weight
-          </label>
-          <Input
-            id="weight"
-            name="weight"
-            type="text"
-            value={formData.weight}
-            onChange={handleChange}
-            placeholder="e.g., 75 kg"
-          />
         </div>
         <div className="flex gap-2 pt-4">
           <Button type="button" variant="danger" className="flex-1" onClick={onClose}>

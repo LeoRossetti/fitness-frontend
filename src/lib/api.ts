@@ -45,6 +45,14 @@ const makeRequest = async (endpoint: string, options: RequestInit & { params?: R
 
     // Проверяем успешность запроса
     if (!response.ok) {
+      // Обработка ошибки 401 - перенаправляем на главную страницу
+      if (response.status === 401) {
+        // Очищаем куки и перенаправляем на главную
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        window.location.href = '/';
+        throw new Error('Unauthorized. Please log in.');
+      }
+      
       let errorMessage = `API Error: ${response.status}`;
       
       // Пытаемся получить детальную информацию об ошибке
@@ -63,9 +71,6 @@ const makeRequest = async (endpoint: string, options: RequestInit & { params?: R
         } catch (textError) {
           // Если и текст не удалось получить, добавляем стандартное сообщение
           switch (response.status) {
-            case 401:
-              errorMessage += ' - Unauthorized. Please log in.';
-              break;
             case 403:
               errorMessage += ' - Forbidden. Insufficient permissions.';
               break;
@@ -114,16 +119,7 @@ export const deleteClient = (id: number) =>
 export const getClientById = (id: number) => 
   makeRequest(`clients/${id}`);
 
-export const updateClient = (id: number, data: {
-  User: { name: string; email: string };
-  phone?: string;
-  goal?: string;
-  address?: string;
-  notes?: string;
-  plan?: string;
-  type?: string;
-  nextSession?: string | null;
-}) => 
+export const updateClient = (id: number, data: Record<string, any>) => 
   makeRequest(`clients/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data)

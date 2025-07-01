@@ -68,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'lg' }: ModalPr
       <div
         className={`relative w-full sm:w-auto min-w-[22rem] ${sizeClass} bg-white rounded-lg shadow-xl transform transition-all duration-300 ${
           closing || !mounted ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-        } p-8`}
+        } p-8 max-h-[90vh] overflow-y-auto`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button
