@@ -464,7 +464,7 @@ export default function CalendarPage() {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-primary mb-2">Duration (minutes)</label>
+              <label className="block text-sm font-medium text-primary mb-2">Duration</label>
               <Select
                 name="duration"
                 value={form.duration}
