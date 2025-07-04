@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Dumbbell, Users, Calendar, MessageCircle, ArrowUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import AuthRedirect from '@/components/auth/AuthRedirect';
 
 
 export default function HomePage() {
@@ -30,7 +31,7 @@ export default function HomePage() {
     }
   };
   return (
-    <>
+    <AuthRedirect>
       {/* Main Content */}
       <main className="bg-white">
         {/* Hero Section */}
@@ -296,6 +297,6 @@ export default function HomePage() {
           <ArrowUp className="h-6 w-6" />
         </button>
       )}
-    </>
+    </AuthRedirect>
   );
 }
