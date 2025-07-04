@@ -76,6 +76,13 @@ export default function CalendarPage() {
 
   // Для выделения дат сессий
   const sessionDates = sessions.map(session => new Date(session.date));
+  const today = new Date();
+  const pastSessionDates = sessions
+    .filter(session => new Date(session.date) < today)
+    .map(session => new Date(session.date));
+  const futureSessionDates = sessions
+    .filter(session => new Date(session.date) >= today)
+    .map(session => new Date(session.date));
 
   // Для отображения сессий за выбранную дату
   const sessionsForSelectedDate = selectedDate
@@ -335,13 +342,16 @@ export default function CalendarPage() {
               className="w-full"
               month={currentMonth}
               onMonthChange={setCurrentMonth}
-              modifiers={{ hasSession: sessionDates }}
+              modifiers={{
+                hasSession: futureSessionDates,
+                pastSession: pastSessionDates,
+              }}
               modifiersClassNames={{
                 selected: "bg-[#8B5CF6] text-white font-bold rounded-lg",
                 hasSession: "border-b-4 border-[#8B5CF6] font-bold",
+                pastSession: "border-b-4 border-green-500 font-bold",
                 today: "border border-[#8B5CF6]",
               }}
-              disabled={{ before: new Date() }}
             />
           </div>
 
