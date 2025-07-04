@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Modal } from '@/components/ui/modal';
 import toast from 'react-hot-toast';
+import { TextField } from '@/components/ui/textfield';
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -17,7 +18,8 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    notes: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,7 +39,7 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
         onClientAdded?.();
         toast.success('Client added successfully');
         // Сбрасываем форму
-        setFormData({ name: '', email: '', phone: '' });
+        setFormData({ name: '', email: '', phone: '', notes: '' });
       } else {
         toast.error('Failed to add client');
       }
@@ -49,7 +51,7 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -57,7 +59,7 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
   };
 
   const handleClose = () => {
-    setFormData({ name: '', email: '', phone: '' });
+    setFormData({ name: '', email: '', phone: '', notes: '' });
     onClose();
   };
 
@@ -103,6 +105,19 @@ export default function AddClientModal({ isOpen, onClose, onClientAdded }: AddCl
             value={formData.phone}
             onChange={handleChange}
             placeholder="+1 (555) 000-0000"
+          />
+        </div>
+        <div>
+          <label htmlFor="notes" className="block text-sm font-medium text-primary mb-2">
+            Notes
+          </label>
+          <TextField
+            id="notes"
+            name="notes"
+            value={formData.notes}
+            onChange={handleChange}
+            placeholder="Add any notes about the client..."
+            rows={3}
           />
         </div>
         <div className="flex gap-3">

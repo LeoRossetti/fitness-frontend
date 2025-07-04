@@ -460,18 +460,15 @@ export default function CalendarPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-primary mb-2">Time</label>
-              <Select
+              <Input
                 name="time"
+                type="time"
                 value={form.time}
                 onChange={handleFormChange}
                 required
-              >
-                {timeOptions.map(option => (
-                  <option key={option.value} value={option.value} disabled={option.disabled}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
+                step="60"
+                className="w-full"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-primary mb-2">Duration</label>
