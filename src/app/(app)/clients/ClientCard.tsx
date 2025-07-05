@@ -1,12 +1,13 @@
 "use client";
 
 import { Client } from '@/types/types';
-import { Edit, Trash2, Calendar, Target, Phone, Mail, User, Clock, Crown, Ruler, Scale, UserCheck } from 'lucide-react';
+import { Edit, Trash2, Calendar, Target, Phone, Mail, User, Clock, Crown, Ruler, Scale, UserCheck, TrendingUp } from 'lucide-react';
 
 interface ClientCardProps {
   client: Client;
   onDelete: (clientId: number, clientName: string) => void;
   onEdit: (clientId: number) => void;
+  onProgress?: (clientId: number) => void;
   onClick?: () => void;
 }
 
@@ -77,7 +78,7 @@ const getInitials = (name: string | undefined) => {
     .slice(0, 2);
 };
 
-export default function ClientCard({ client, onDelete, onEdit, onClick }: ClientCardProps) {
+export default function ClientCard({ client, onDelete, onEdit, onProgress, onClick }: ClientCardProps) {
   const nextSession = formatNextSession(client.nextSession);
   const hasNextSession = nextSession !== 'Not scheduled' && nextSession !== 'Invalid date format';
 
@@ -192,6 +193,16 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onProgress?.(client.id);
+            }}
+            className="flex items-center gap-1 border border-gray-300 text-[#8B5CF6] px-2 py-1 cursor-pointer rounded hover:border-[#8B5CF6] hover:bg-purple-50 transition-colors"
+          >
+            <TrendingUp className="h-4 w-4" />
+            <span className="text-sm">Progress</span>
+          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
