@@ -64,6 +64,8 @@ export default function CalendarPage() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [editForm, setEditForm] = useState<{ note: string }>({ note: '' });
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [isDeletingSession, setIsDeletingSession] = useState<number | null>(null);
 
   // Получаем сессии за месяц при первом рендере и смене месяца
   useEffect(() => {
@@ -171,6 +173,8 @@ export default function CalendarPage() {
       return;
     }
 
+    setIsCreatingSession(true);
+
     try {
       // Создаем дату в локальной временной зоне
       const localDate = new Date(selectedDate);
@@ -209,6 +213,24 @@ export default function CalendarPage() {
 
       console.log('Creating session with data:', sessionData);
 
+      // Оптимистичное обновление - добавляем сессию сразу
+      const optimisticSession: Session = {
+        id: Date.now(), // Временный ID
+        clientId: Number(form.clientId),
+        time: form.time,
+        note: form.note,
+        duration: Number(form.duration),
+        date,
+        status: 'scheduled',
+        Client: clients.find(c => c.id === Number(form.clientId)) as any,
+        WorkoutTemplate: templates.find(t => t.id === Number(form.workoutTemplateId)),
+      };
+
+      setSessions(prev => [...prev, optimisticSession]);
+
+      // Закрываем модальное окно сразу
+      setIsAddModalOpen(false);
+
       await createSession(sessionData);
 
       // Показываем уведомление об успехе
@@ -217,8 +239,7 @@ export default function CalendarPage() {
         position: 'top-right',
       });
 
-      // Закрываем модальное окно и обновляем состояние
-      setIsAddModalOpen(false);
+      // Обновляем месяц для календаря
       setCurrentMonth(new Date(selectedDate));
       setForm({
         clientId: '',
@@ -234,10 +255,13 @@ export default function CalendarPage() {
         duration: 5000,
         position: 'top-right',
       });
+    } finally {
+      setIsCreatingSession(false);
     }
   };
 
   const handleDeleteSession = async (sessionId: number) => {
+    setIsDeletingSession(sessionId);
     try {
       console.log('Starting session deletion process for ID:', sessionId);
       
@@ -266,6 +290,8 @@ export default function CalendarPage() {
       console.error('Error in handleDeleteSession:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to cancel session';
       toast.error(errorMessage);
+    } finally {
+      setIsDeletingSession(null);
     }
   };
 
@@ -499,11 +525,16 @@ export default function CalendarPage() {
               />
             </div>
             <div className="flex justify-end gap-2 mt-6">
-              <Button type="button" variant="danger" onClick={() => setIsAddModalOpen(false)}>
+              <Button 
+                type="button" 
+                variant="danger" 
+                onClick={() => setIsAddModalOpen(false)}
+                disabled={isCreatingSession}
+              >
                 Cancel
               </Button>
-              <Button type="submit">
-                Save
+              <Button type="submit" disabled={isCreatingSession}>
+                {isCreatingSession ? 'Creating...' : 'Save'}
               </Button>
             </div>
           </form>

@@ -28,6 +28,7 @@ export default function SessionDetailsModal({
 }: SessionDetailsModalProps) {
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [editNote, setEditNote] = useState(session?.note || '');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (!session) return null;
 
@@ -125,7 +126,11 @@ export default function SessionDetailsModal({
         </div>
         {/* Actions */}
         <div className="flex gap-3 justify-end mt-2 pb-6">
-          <Button className="min-w-[90px] rounded-lg shadow-md hover:shadow-lg transition-all" onClick={onDelete} variant="danger">
+          <Button 
+            className="min-w-[90px] rounded-lg shadow-md hover:shadow-lg transition-all" 
+            onClick={() => setShowDeleteConfirm(true)} 
+            variant="danger"
+          >
             Delete
           </Button>
           <Button className="min-w-[90px] rounded-lg shadow-md hover:shadow-lg transition-all" onClick={() => { onClose(); setIsEditingNote(false); }} variant="default">
@@ -133,6 +138,34 @@ export default function SessionDetailsModal({
           </Button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <Modal isOpen={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} title="Confirm Deletion">
+          <div className="p-6">
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete this session? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button 
+                variant="default" 
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  onDelete();
+                }}
+              >
+                Delete Session
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </Modal>
   );
 } 
