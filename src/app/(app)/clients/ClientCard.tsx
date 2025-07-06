@@ -196,16 +196,6 @@ export default function ClientCard({ client, onDelete, onEdit, onProgress, onCli
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onProgress?.(client.id);
-            }}
-            className="flex items-center gap-1 border border-gray-300 text-[#8B5CF6] px-2 py-1 cursor-pointer rounded hover:border-[#8B5CF6] hover:bg-purple-50 transition-colors"
-          >
-            <TrendingUp className="h-4 w-4" />
-            <span className="text-sm">Progress</span>
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
               onEdit(client.id);
             }}
             className="flex items-center gap-1 border border-gray-300 text-[#1F2A44] px-2 py-1 cursor-pointer rounded hover:border-gray-500 hover:bg-gray-100 transition-colors"

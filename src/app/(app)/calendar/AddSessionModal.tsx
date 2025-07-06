@@ -9,16 +9,20 @@ interface AddSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (formData: any) => void;
+  onSaveRecurring?: (formData: any) => void;
   clients: { id: number; User: { name: string } }[];
   templates: ServerWorkoutTemplate[];
   isCreating: boolean;
   selectedDate: Date | undefined;
 }
 
+const WEEK_OPTIONS = [4, 8, 12, 16, 24, 32];
+
 export default function AddSessionModal({
   isOpen,
   onClose,
   onSave,
+  onSaveRecurring,
   clients,
   templates,
   isCreating,
@@ -32,7 +36,9 @@ export default function AddSessionModal({
     duration: '60',
   });
 
-  // Сброс формы при открытии модалки
+  const [repeatWeekly, setRepeatWeekly] = useState(false);
+  const [weeksCount, setWeeksCount] = useState(8);
+
   useEffect(() => {
     if (isOpen) {
       setForm({
@@ -42,10 +48,11 @@ export default function AddSessionModal({
         note: '',
         duration: '60',
       });
+      setRepeatWeekly(false);
+      setWeeksCount(8);
     }
   }, [isOpen]);
 
-  // Обработчик изменения полей формы
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | { name: string, value: string }
   ) => {
@@ -56,7 +63,6 @@ export default function AddSessionModal({
     }
   };
 
-  // Генерируем опции времени с шагом 15 минут с 07:00 до 22:00
   const timeOptions = [
     { value: '', label: 'Choose time', disabled: true },
     ...Array.from({ length: ((22 - 7) * 4) + 1 }, (_, i) => {
@@ -67,7 +73,6 @@ export default function AddSessionModal({
     })
   ];
 
-  // Опции для длительности сессии
   const durationOptions = [
     { value: '30', label: '30 minutes' },
     { value: '45', label: '45 minutes' },
@@ -82,7 +87,27 @@ export default function AddSessionModal({
     if (!selectedDate || !form.time || !form.workoutTemplateId) {
       return;
     }
-    onSave(form);
+
+    if (repeatWeekly && onSaveRecurring) {
+      // Генерируем N дат с шагом 7 дней от выбранной даты
+      const baseDate = new Date(selectedDate);
+      const [hours, minutes] = form.time.split(':').map(Number);
+      baseDate.setHours(hours, minutes, 0, 0);
+      const dates: string[] = [];
+      for (let i = 0; i < weeksCount; i++) {
+        const d = new Date(baseDate);
+        d.setDate(baseDate.getDate() + i * 7);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+      const recurringData = {
+        ...form,
+        dates,
+        time: form.time,
+      };
+      onSaveRecurring(recurringData);
+    } else {
+      onSave(form);
+    }
   };
 
   return (
@@ -157,6 +182,35 @@ export default function AddSessionModal({
             rows={2}
             placeholder="Optional note..."
           />
+        </div>
+        <div className="border-t pt-4">
+          <div className="flex items-center gap-4 mb-2">
+            <input
+              type="checkbox"
+              id="repeatWeekly"
+              checked={repeatWeekly}
+              onChange={(e) => setRepeatWeekly(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            <label htmlFor="repeatWeekly" className="text-sm font-medium text-primary">
+              Repeat every week
+            </label>
+            {repeatWeekly && (
+              <div className="flex items-center gap-2">
+                <label htmlFor="weeksCount" className="text-sm">Number of weeks:</label>
+                <Select
+                  id="weeksCount"
+                  name="weeksCount"
+                  value={weeksCount}
+                  onChange={(e) => setWeeksCount(Number(e.target.value))}
+                >
+                  {WEEK_OPTIONS.map(weeks => (
+                    <option key={weeks} value={weeks}>{weeks}</option>
+                  ))}
+                </Select>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex justify-end gap-2 mt-6">
           <Button 

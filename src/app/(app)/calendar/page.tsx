@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Session } from '@/types/types';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useSessions } from '@/hooks/useSessions';
+import { createBulkSessions } from '@/lib/api';
 import CalendarGrid from './CalendarGrid';
 import SessionsList from './SessionsList';
 import AddSessionModal from './AddSessionModal';
@@ -57,6 +58,32 @@ export default function CalendarPage() {
       setIsAddModalOpen(false);
       setCurrentMonth(new Date(selectedDate));
     });
+  };
+
+  // Обработчик создания повторяющихся сессий
+  const handleCreateRecurringSessions = async (formData: any) => {
+    try {
+      const response = await createBulkSessions({
+        clientId: parseInt(formData.clientId),
+        dates: formData.dates,
+        time: formData.time,
+        note: formData.note,
+        duration: formData.duration ? parseInt(formData.duration) : undefined,
+        workoutTemplateId: formData.workoutTemplateId ? parseInt(formData.workoutTemplateId) : undefined,
+      });
+
+      console.log('Created recurring sessions:', response);
+      
+      // Обновляем календарь
+      await refreshSessions();
+      setIsAddModalOpen(false);
+      
+      // Показываем уведомление
+      alert(`Successfully created ${response.sessionsCreated} sessions!`);
+    } catch (error) {
+      console.error('Error creating recurring sessions:', error);
+      alert(`Error creating sessions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   // Обработчик удаления сессии
@@ -122,6 +149,7 @@ export default function CalendarPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleCreateSession}
+        onSaveRecurring={handleCreateRecurringSessions}
         clients={clients}
         templates={templates}
         isCreating={isCreatingSession}

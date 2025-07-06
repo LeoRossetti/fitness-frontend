@@ -176,6 +176,20 @@ export const updateSession = (id: number, data: Partial<Session>) =>
     method: 'PUT',
     body: JSON.stringify(data),
   });
+
+export const createBulkSessions = (data: {
+  clientId: number;
+  dates: string[];
+  time?: string;
+  note?: string;
+  duration?: number;
+  status?: string;
+  workoutTemplateId?: number;
+}): Promise<{ message: string; sessionsCreated: number; sessions: Session[] }> =>
+  makeRequest('sessions/bulk-create', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------EXERCISES------------------------------------------------------------------------------------------------
