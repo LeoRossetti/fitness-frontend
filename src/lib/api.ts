@@ -8,7 +8,10 @@ import {
   CreateSessionData, 
   WorkoutTemplate,
   CreateWorkoutTemplateData,
-  ServerWorkoutTemplate
+  ServerWorkoutTemplate,
+  Progress,
+  CreateProgressData,
+  ProgressStats
 } from '../types/types';
 
 // Универсальная функция для всех API запросов
@@ -205,4 +208,33 @@ export const updateWorkoutTemplate = (id: number, data: any): Promise<ServerWork
 
 export const deleteWorkoutTemplate = (id: number): Promise<void> => 
   makeRequest(`workout-templates/${id}`, { method: 'DELETE' });
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------PROGRESS------------------------------------------------------------------------------------------------
+export const getClientProgress = (clientId: number): Promise<Progress[]> => 
+  makeRequest(`clients/${clientId}/progress`);
+
+export const createProgress = (data: CreateProgressData): Promise<Progress> => 
+  makeRequest('progress', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+
+export const updateProgress = (id: number, data: Partial<CreateProgressData>): Promise<Progress> => 
+  makeRequest(`progress/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  });
+
+export const deleteProgress = (id: number): Promise<void> => 
+  makeRequest(`progress/${id}`, { method: 'DELETE' });
+
+export const getClientProgressStats = (clientId: number): Promise<ProgressStats> => 
+  makeRequest(`clients/${clientId}/progress-stats`);
+
+export const getProgressByType = (clientId: number, type: string): Promise<Progress[]> => 
+  makeRequest(`clients/${clientId}/progress`, { params: { type } });
+
+export const getProgressByCategory = (clientId: number, category: string): Promise<Progress[]> => 
+  makeRequest(`clients/${clientId}/progress`, { params: { category } });
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

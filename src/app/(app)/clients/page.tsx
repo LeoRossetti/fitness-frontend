@@ -214,6 +214,10 @@ export default function ClientsPage() {
     setEditingClientId(clientId);
   };
 
+  const handleProgress = (clientId: number) => {
+    router.push(`/clients/${clientId}/progress`);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -326,6 +330,7 @@ export default function ClientsPage() {
                 client={client}
                 onDelete={handleDeleteClient}
                 onEdit={() => handleEdit(client.id)}
+                onProgress={() => handleProgress(client.id)}
                 onClick={() => router.push(`/clients/${client.id}`)}
               />
             ))

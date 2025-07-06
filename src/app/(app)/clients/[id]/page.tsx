@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getClientById, getSessionsByMonth, updateClient } from '@/lib/api';
 import { Avatar } from '@/components/ui/Avatar';
 import { User, Mail, Phone, MapPin, Crown, Calendar, Clock, TrendingUp, Activity, FileText, Check, X, Pencil } from 'lucide-react';
@@ -232,6 +232,7 @@ function EditableSection({
 
 export default function ClientDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const clientId = Number(params.id);
   const [client, setClient] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
@@ -403,11 +404,23 @@ export default function ClientDetailsPage() {
         )}
         {activeTab === 'progress' && (
           <div className="space-y-4">
-            <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-violet-500" />
-              Progress
-            </h3>
-            <div className="text-gray-500">Progress tracking coming soon.</div>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="h-8 w-8 text-violet-600" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Progress Tracking</h3>
+              <p className="text-gray-500 mb-6">
+                View detailed progress tracking and analytics for this client
+              </p>
+              <Button
+                onClick={() => router.push(`/clients/${clientId}/progress`)}
+                variant="success"
+                className="flex items-center gap-2 mx-auto"
+              >
+                <TrendingUp className="h-5 w-5" />
+                View Progress
+              </Button>
+            </div>
           </div>
         )}
       </div>
