@@ -121,3 +121,57 @@ export interface ServerWorkoutTemplate {
 
 // Типы для создания шаблона (без id и дат)
 export type CreateWorkoutTemplateData = Omit<WorkoutTemplate, "id" | "createdAt" | "updatedAt">;
+
+// Progress tracking types
+export interface Progress {
+  id: number;
+  clientId: number;
+  date: string;
+  type: 'weight' | 'measurements' | 'strength' | 'cardio' | 'flexibility' | 'body_composition';
+  category: string;
+  value: number;
+  unit: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProgressData {
+  clientId: number;
+  date: string;
+  type: 'weight' | 'measurements' | 'strength' | 'cardio' | 'flexibility' | 'body_composition';
+  category: string;
+  value: number;
+  unit: string;
+  notes?: string;
+}
+
+export interface ProgressStats {
+  totalSessions: number;
+  completedSessions: number;
+  cancelledSessions: number;
+  attendanceRate: number;
+  averageWeight?: number;
+  weightChange?: number;
+  strengthProgress?: Record<string, { current: number; previous: number; change: number }>;
+  measurements?: Record<string, { current: number; previous: number; change: number }>;
+}
+
+// Progress categories for different types
+export const PROGRESS_CATEGORIES = {
+  weight: ['weight'],
+  measurements: ['chest', 'waist', 'hips', 'biceps', 'thighs', 'calves', 'shoulders', 'neck'],
+  strength: ['bench_press', 'squat', 'deadlift', 'overhead_press', 'pull_ups', 'push_ups'],
+  cardio: ['running_5k', 'running_10k', 'cycling', 'rowing', 'swimming'],
+  flexibility: ['sit_and_reach', 'shoulder_flexibility', 'hip_flexibility'],
+  body_composition: ['body_fat_percentage', 'muscle_mass', 'bmi']
+} as const;
+
+export const PROGRESS_UNITS = {
+  weight: 'kg',
+  measurements: 'cm',
+  strength: 'kg',
+  cardio: 'minutes',
+  flexibility: 'cm',
+  body_composition: '%'
+} as const;

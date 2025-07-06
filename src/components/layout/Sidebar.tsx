@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Dumbbell, LayoutDashboard, Users, Calendar, ChevronLeft, ChevronRight, Menu, FileText, LogOut } from 'lucide-react';
+import { Dumbbell, LayoutDashboard, Users, Calendar, ChevronLeft, ChevronRight, Menu, FileText, LogOut, TrendingUp } from 'lucide-react';
 import { useContext, useState, useEffect } from 'react';
 import { SidebarContext } from '@/components/layout/SidebarProvider';
 
@@ -103,6 +103,14 @@ export default function Sidebar() {
               collapsed={false}
               onMobileItemClick={() => setIsMobileMenuOpen(false)}
             />
+            <SidebarItem
+              href="/progress"
+              icon={<TrendingUp size={20} />}
+              label="Progress"
+              active={pathname.startsWith('/progress')}
+              collapsed={false}
+              onMobileItemClick={() => setIsMobileMenuOpen(false)}
+            />
           </nav>
 
           {/* Секция пользователя в мобильном меню */}
@@ -194,6 +202,14 @@ export default function Sidebar() {
             icon={<Calendar size={20} />}
             label="Calendar"
             active={pathname === '/calendar'}
+            collapsed={collapsed}
+            onMobileItemClick={() => setIsMobileMenuOpen(false)}
+          />
+          <SidebarItem
+            href="/progress"
+            icon={<TrendingUp size={20} />}
+            label="Progress"
+            active={pathname.startsWith('/progress')}
             collapsed={collapsed}
             onMobileItemClick={() => setIsMobileMenuOpen(false)}
           />

@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
+import { Modal } from '@/components/ui/modal';
 
 export default function ClientsPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +25,19 @@ export default function ClientsPage() {
   const [filter, setFilter] = useState<'All' | 'Subscription' | 'Single Session'>('All');
 
   const [editingClientId, setEditingClientId] = useState<number | null>(null);
+
+  // Состояние для подтверждения удаления клиента
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    clientId: number | null;
+    clientName: string;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    clientId: null,
+    clientName: '',
+    isLoading: false
+  });
 
   const router = useRouter();
 
@@ -108,14 +122,28 @@ export default function ClientsPage() {
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const handleDeleteClient = async (id: number) => {
+  const handleDeleteClient = (clientId: number, clientName: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      clientId,
+      clientName,
+      isLoading: false
+    });
+  };
+
+  const confirmDeleteClient = async () => {
+    if (!deleteConfirmation.clientId) return;
+
+    setDeleteConfirmation(prev => ({ ...prev, isLoading: true }));
+
     try {
       // Сначала пробуем удалить клиента напрямую
       try {
-        await deleteClient(id);
-        setClients(prev => prev.filter(client => client.id !== id));
-        setFilteredClients(prev => prev.filter(client => client.id !== id));
+        await deleteClient(deleteConfirmation.clientId);
+        setClients(prev => prev.filter(client => client.id !== deleteConfirmation.clientId));
+        setFilteredClients(prev => prev.filter(client => client.id !== deleteConfirmation.clientId));
         toast.success('Client has been deleted');
+        setDeleteConfirmation({ isOpen: false, clientId: null, clientName: '', isLoading: false });
         return;
       } catch (deleteError) {
         console.log('Direct client deletion failed, trying to delete sessions first');
@@ -134,13 +162,14 @@ export default function ClientsPage() {
       if (!response.ok) {
         console.error('Failed to fetch sessions:', response.status, response.statusText);
         toast.error('Failed to delete client');
+        setDeleteConfirmation({ isOpen: false, clientId: null, clientName: '', isLoading: false });
         return;
       }
 
       const allSessions = await response.json();
       
       // Фильтруем сессии только для этого клиента
-      const clientSessions = allSessions.filter((session: any) => session.Client?.id === id);
+      const clientSessions = allSessions.filter((session: any) => session.Client?.id === deleteConfirmation.clientId);
       
       if (clientSessions.length > 0) {
         // Удаляем каждую сессию клиента
@@ -159,23 +188,34 @@ export default function ClientsPage() {
         if (failedDeletes.length > 0) {
           console.error('Some sessions failed to delete:', failedDeletes);
           toast.error('Failed to delete some sessions');
+          setDeleteConfirmation({ isOpen: false, clientId: null, clientName: '', isLoading: false });
           return;
         }
       }
 
       // После успешного удаления всех сессий пробуем снова удалить клиента
-      await deleteClient(id);
-      setClients(prev => prev.filter(client => client.id !== id));
-      setFilteredClients(prev => prev.filter(client => client.id !== id));
+      await deleteClient(deleteConfirmation.clientId);
+      setClients(prev => prev.filter(client => client.id !== deleteConfirmation.clientId));
+      setFilteredClients(prev => prev.filter(client => client.id !== deleteConfirmation.clientId));
       toast.success('Client and all their sessions have been deleted');
+      setDeleteConfirmation({ isOpen: false, clientId: null, clientName: '', isLoading: false });
     } catch (err) {
       console.error('Error deleting client:', err);
       toast.error('Failed to delete client');
+      setDeleteConfirmation({ isOpen: false, clientId: null, clientName: '', isLoading: false });
     }
+  };
+
+  const cancelDeleteClient = () => {
+    setDeleteConfirmation({ isOpen: false, clientId: null, clientName: '', isLoading: false });
   };
 
   const handleEdit = (clientId: number) => {
     setEditingClientId(clientId);
+  };
+
+  const handleProgress = (clientId: number) => {
+    router.push(`/clients/${clientId}/progress`);
   };
 
   if (loading) {
@@ -288,8 +328,9 @@ export default function ClientsPage() {
               <ClientCard
                 key={client.id}
                 client={client}
-                onDelete={() => handleDeleteClient(client.id)}
+                onDelete={handleDeleteClient}
                 onEdit={() => handleEdit(client.id)}
+                onProgress={() => handleProgress(client.id)}
                 onClick={() => router.push(`/clients/${client.id}`)}
               />
             ))
@@ -313,6 +354,49 @@ export default function ClientsPage() {
             }}
           />
         )}
+
+        {/* Модалка подтверждения удаления клиента */}
+        <Modal
+          isOpen={deleteConfirmation.isOpen}
+          onClose={cancelDeleteClient}
+          title="Delete Client"
+        >
+          <div className="p-6">
+            <div className="mb-6">
+              <p className="text-gray-700 mb-4">
+                Are you sure you want to delete <strong>{deleteConfirmation.clientName}</strong>?
+              </p>
+              <p className="text-sm text-gray-500">
+                This action will permanently delete the client and all associated sessions. This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={cancelDeleteClient}
+                variant="outline"
+                disabled={deleteConfirmation.isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeleteClient}
+                variant="danger"
+                disabled={deleteConfirmation.isLoading}
+                className="flex items-center gap-2"
+              >
+                {deleteConfirmation.isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Client'
+                )}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </main>
   );

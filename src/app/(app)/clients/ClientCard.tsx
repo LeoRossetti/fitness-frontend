@@ -1,12 +1,13 @@
 "use client";
 
 import { Client } from '@/types/types';
-import { Edit, Trash2, Calendar, Target, Phone, Mail, User, Clock, Crown, Ruler, Scale, UserCheck } from 'lucide-react';
+import { Edit, Trash2, Calendar, Target, Phone, Mail, User, Clock, Crown, Ruler, Scale, UserCheck, TrendingUp } from 'lucide-react';
 
 interface ClientCardProps {
   client: Client;
-  onDelete: () => void;
+  onDelete: (clientId: number, clientName: string) => void;
   onEdit: (clientId: number) => void;
+  onProgress?: (clientId: number) => void;
   onClick?: () => void;
 }
 
@@ -77,7 +78,7 @@ const getInitials = (name: string | undefined) => {
     .slice(0, 2);
 };
 
-export default function ClientCard({ client, onDelete, onEdit, onClick }: ClientCardProps) {
+export default function ClientCard({ client, onDelete, onEdit, onProgress, onClick }: ClientCardProps) {
   const nextSession = formatNextSession(client.nextSession);
   const hasNextSession = nextSession !== 'Not scheduled' && nextSession !== 'Invalid date format';
 
@@ -205,7 +206,7 @@ export default function ClientCard({ client, onDelete, onEdit, onClick }: Client
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onDelete();
+              onDelete(client.id, client.User?.name || 'Unknown Client');
             }}
             className="border border-gray-300 text-[#EF4444] p-1 cursor-pointer rounded hover:border-[#EF4444] hover:bg-gray-100 transition-colors"
           >
