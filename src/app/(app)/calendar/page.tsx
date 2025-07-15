@@ -107,15 +107,15 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#1F2A44]">Calendar</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1F2A44]">Calendar</h1>
             <p className="text-sm text-[#6B7280] mt-1">Manage your training sessions</p>
           </div>
           <Button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer w-full sm:w-auto"
             variant="success"
           >
             <Plus className="h-5 w-5" />
@@ -123,7 +123,7 @@ export default function CalendarPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
           {/* Calendar Grid */}
           <CalendarGrid
             selectedDate={selectedDate}

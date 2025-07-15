@@ -300,16 +300,16 @@ export default function ProgressPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4">
+    <div className="max-w-7xl mx-auto py-6 px-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Progress Tracking</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Progress Tracking</h1>
           <p className="text-gray-500 text-base mt-1">Monitor your clients' fitness journey</p>
         </div>
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
           {/* Client select */}
-          <div className="min-w-[180px]">
+          <div className="w-full sm:min-w-[180px]">
             <Select
               value={selectedClientId || ''}
               onChange={e => setSelectedClientId(e.target.value ? Number(e.target.value) : null)}
@@ -328,7 +328,7 @@ export default function ProgressPage() {
           {selectedClientId && (
             <Button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto"
             >
               <Plus className="h-4 w-4" />
               Add Measurement
@@ -338,12 +338,12 @@ export default function ProgressPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 mb-8">
+      <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-6 overflow-x-auto">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
               activeTab === tab.id
                 ? 'border-violet-500 text-violet-600 bg-violet-50'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -353,7 +353,10 @@ export default function ProgressPage() {
             {tab.id === 'measurements' && <User className="h-4 w-4" />}
             {tab.id === 'attendance' && <BarChart2 className="h-4 w-4" />}
             {tab.id === 'goals' && <Target className="h-4 w-4" />}
-            {tab.label}
+            <span className="hidden sm:inline">{tab.label}</span>
+            <span className="sm:hidden">
+              {tab.id === 'overview' ? 'Overview' : tab.id === 'measurements' ? 'Meas' : tab.id === 'attendance' ? 'Attend' : 'Goals'}
+            </span>
           </button>
         ))}
       </div>

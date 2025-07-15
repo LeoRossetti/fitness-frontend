@@ -14,6 +14,7 @@ export const TextField = React.forwardRef<
       'disabled:cursor-not-allowed disabled:opacity-50',
       'transition-colors duration-200',
       'resize-vertical min-h-[80px]',
+      'cursor-pointer',
       className
     )}
     {...props}

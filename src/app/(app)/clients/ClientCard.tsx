@@ -78,6 +78,8 @@ const getInitials = (name: string | undefined) => {
     .slice(0, 2);
 };
 
+
+
 export default function ClientCard({ client, onDelete, onEdit, onProgress, onClick }: ClientCardProps) {
   const nextSession = formatNextSession(client.nextSession);
   const hasNextSession = nextSession !== 'Not scheduled' && nextSession !== 'Invalid date format';
@@ -89,31 +91,34 @@ export default function ClientCard({ client, onDelete, onEdit, onProgress, onCli
 
   return (
     <div
-      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 p-6 mb-4 cursor-pointer"
+      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 p-4 mb-3 cursor-pointer"
       onClick={handleCardClick}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         {/* Main info */}
-        <div className="flex items-start gap-4 flex-1">
+        <div className="flex items-start gap-3 flex-1">
           {/* Avatar */}
-          <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-lg">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base shadow-lg flex-shrink-0">
             {getInitials(client.User?.name)}
           </div>
 
           {/* Client info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-xl font-bold text-gray-900 truncate">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">
                 {client.User?.name || 'Unknown Client'}
               </h3>
-              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getPlanColor(client.plan)}`}>
+              <span className={`inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${getPlanColor(client.plan)}`}>
                 {getPlanIcon(client.plan)}
-                {client.plan}
+                <span className="hidden sm:inline">{client.plan}</span>
+                <span className="sm:hidden">
+                  {client.plan === 'Premium Monthly' ? 'Premium' : client.plan === 'Standard Weekly' ? 'Standard' : 'Single'}
+                </span>
               </span>
             </div>
 
             {/* Contact info */}
-            <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Mail className="h-4 w-4 text-gray-400" />
                 <span className="truncate">{client.User?.email}</span>
@@ -121,13 +126,14 @@ export default function ClientCard({ client, onDelete, onEdit, onProgress, onCli
               {client.phone && (
                 <div className="flex items-center gap-1">
                   <Phone className="h-4 w-4 text-gray-400" />
-                  <span>{client.phone}</span>
+                  <span className="hidden sm:inline">{client.phone}</span>
+                  <span className="sm:hidden">{client.phone.replace(/\d(?=\d{4})/g, '*')}</span>
                 </div>
               )}
             </div>
 
             {/* Additional info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               {client.goal && (
                 <div className="flex items-start gap-2">
                   <Target className="h-4 w-4 text-violet-500 mt-0.5 flex-shrink-0" />
@@ -145,10 +151,9 @@ export default function ClientCard({ client, onDelete, onEdit, onProgress, onCli
                   <p className={`text-sm ${hasNextSession ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
                     {nextSession}
                   </p>
+
                 </div>
               </div>
-
-
 
               {client.age && (
                 <div className="flex items-start gap-2">
@@ -183,7 +188,7 @@ export default function ClientCard({ client, onDelete, onEdit, onProgress, onCli
 
             {/* Notes */}
             {client.notes && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+              <div className="mt-2 p-2 bg-gray-50 rounded-lg">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Notes</p>
                 <p className="text-sm text-gray-700 line-clamp-2">{client.notes}</p>
               </div>
@@ -201,7 +206,7 @@ export default function ClientCard({ client, onDelete, onEdit, onProgress, onCli
             className="flex items-center gap-1 border border-gray-300 text-[#1F2A44] px-2 py-1 cursor-pointer rounded hover:border-gray-500 hover:bg-gray-100 transition-colors"
           >
             <Edit className="h-4 w-4" />
-            <span className="text-sm">Edit</span>
+            <span className="hidden sm:inline text-sm">Edit</span>
           </button>
           <button
             onClick={(e) => {
@@ -210,7 +215,7 @@ export default function ClientCard({ client, onDelete, onEdit, onProgress, onCli
             }}
             className="border border-gray-300 text-[#EF4444] p-1 cursor-pointer rounded hover:border-[#EF4444] hover:bg-gray-100 transition-colors"
           >
-            <Trash2 className="h-5 w-5" />
+            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
       </div>
