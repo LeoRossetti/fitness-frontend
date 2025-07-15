@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getClientById, getSessionsByMonth, updateClient } from '@/lib/api';
 import { Avatar } from '@/components/ui/Avatar';
-import { User, Mail, Phone, MapPin, Crown, Calendar, Clock, TrendingUp, Activity, FileText, Check, X, Pencil } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Crown, Calendar, Clock, Activity, FileText, Check, X, Pencil, TrendingUp, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import toast from 'react-hot-toast';
@@ -237,7 +237,7 @@ export default function ClientDetailsPage() {
   const [client, setClient] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'progress'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'sessions'>('overview');
 
   useEffect(() => {
     if (!clientId) return;
@@ -286,19 +286,37 @@ export default function ClientDetailsPage() {
       </div>
 
       {/* Plan */}
-      <div className="mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${getPlanColor(client.plan)}`}>
           {getPlanIcon(client.plan)}
           {client.plan || 'No plan'}
         </span>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={() => router.push(`/progress?client=${clientId}`)}
+            className="flex items-center gap-2"
+          >
+            <TrendingUp className="h-4 w-4" />
+            View Progress
+          </Button>
+          <Button
+            onClick={() => router.push(`/progress?client=${clientId}&tab=measurements&add=true`)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Measurement
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
       <div className="flex border-b border-gray-200 mb-6">
         {[
           { id: 'overview', label: 'Overview', icon: User },
-          { id: 'sessions', label: 'Sessions', icon: Calendar },
-          { id: 'progress', label: 'Progress', icon: TrendingUp }
+          { id: 'sessions', label: 'Sessions', icon: Calendar }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -338,13 +356,14 @@ export default function ClientDetailsPage() {
             />
             {/* Main Info */}
             <EditableSection
-              fields={['goal', 'plan', 'age', 'height', 'weight']}
+              fields={['goal', 'plan', 'age', 'height', 'weight', 'targetWeight']}
               values={{
                 goal: client.goal,
                 plan: client.plan,
                 age: client.age,
                 height: client.height,
                 weight: client.weight,
+                targetWeight: client.targetWeight,
               }}
               labels={{
                 goal: 'Goal',
@@ -352,12 +371,14 @@ export default function ClientDetailsPage() {
                 age: 'Age',
                 height: 'Height',
                 weight: 'Weight',
+                targetWeight: 'Target Weight',
               }}
               types={{
                 plan: 'select',
                 age: 'number',
                 height: 'number',
                 weight: 'number',
+                targetWeight: 'number',
               }}
               options={{
                 plan: [
@@ -366,7 +387,7 @@ export default function ClientDetailsPage() {
                   { value: 'Single Session', label: 'Single Session' },
                 ],
               }}
-              onSave={vals => handleSectionSave(['goal', 'plan', 'age', 'height', 'weight'], vals)}
+              onSave={vals => handleSectionSave(['goal', 'plan', 'age', 'height', 'weight', 'targetWeight'], vals)}
               sectionTitle="Main Information"
             />
           </div>
@@ -402,27 +423,7 @@ export default function ClientDetailsPage() {
             )}
           </div>
         )}
-        {activeTab === 'progress' && (
-          <div className="space-y-4">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="h-8 w-8 text-violet-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Progress Tracking</h3>
-              <p className="text-gray-500 mb-6">
-                View detailed progress tracking and analytics for this client
-              </p>
-              <Button
-                onClick={() => router.push(`/clients/${clientId}/progress`)}
-                variant="success"
-                className="flex items-center gap-2 mx-auto"
-              >
-                <TrendingUp className="h-5 w-5" />
-                View Progress
-              </Button>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );
