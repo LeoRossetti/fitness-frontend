@@ -4,7 +4,7 @@ import { Session, ServerWorkoutTemplate } from '@/types/types';
 import { toast } from 'react-hot-toast';
 
 export const useSessions = (sessions: Session[], setSessions: React.Dispatch<React.SetStateAction<Session[]>>) => {
-  const [clients, setClients] = useState<{ id: number; User: { name: string } }[]>([]);
+  const [clients, setClients] = useState<{ id: number; User?: { name: string; email: string } }[]>([]);
   const [templates, setTemplates] = useState<ServerWorkoutTemplate[]>([]);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isDeletingSession, setIsDeletingSession] = useState<number | null>(null);
