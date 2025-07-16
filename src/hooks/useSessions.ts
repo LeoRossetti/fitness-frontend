@@ -4,7 +4,7 @@ import { Session, ServerWorkoutTemplate } from '@/types/types';
 import { toast } from 'react-hot-toast';
 
 export const useSessions = (sessions: Session[], setSessions: React.Dispatch<React.SetStateAction<Session[]>>) => {
-  const [clients, setClients] = useState<{ id: number; User?: { name: string; email: string } }[]>([]);
+  const [clients, setClients] = useState<{ id: number; User: { name: string; email: string } }[]>([]);
   const [templates, setTemplates] = useState<ServerWorkoutTemplate[]>([]);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [isDeletingSession, setIsDeletingSession] = useState<number | null>(null);
@@ -17,7 +17,11 @@ export const useSessions = (sessions: Session[], setSessions: React.Dispatch<Rea
         getClients(),
         getWorkoutTemplates()
       ]);
-      setClients(clientsData);
+      // Фильтруем клиентов, у которых есть поле User, и приводим к нужному типу
+      const validClients = clientsData
+        .filter((client) => !!client.User)
+        .map((client) => ({ id: client.id, User: client.User! }));
+      setClients(validClients);
       setTemplates(templatesData.templates);
     } catch (err) {
       console.error('Failed to load form data:', err);

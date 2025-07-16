@@ -10,7 +10,7 @@ interface AddSessionModalProps {
   onClose: () => void;
   onSave: (formData: any) => void;
   onSaveRecurring?: (formData: any) => void;
-  clients: { id: number; User: { name: string } }[];
+  clients: { id: number; User?: { name: string; email: string } }[];
   templates: ServerWorkoutTemplate[];
   isCreating: boolean;
   selectedDate: Date | undefined;
