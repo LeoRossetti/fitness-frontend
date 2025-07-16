@@ -11,7 +11,8 @@ import {
   ServerWorkoutTemplate,
   Progress,
   CreateProgressData,
-  ProgressStats
+  ProgressStats,
+  Client
 } from '../types/types';
 
 // Универсальная функция для всех API запросов
@@ -40,11 +41,14 @@ const makeRequest = async (endpoint: string, options: RequestInit & { params?: R
   try {
     // Делаем запрос к серверу
     // Пример: GET запрос к 'http://localhost:1337/api/sessions?date=2024-01-15'
+    console.log(`🌐 Making ${fetchOptions.method || 'GET'} request to: ${url}`);
     const response = await fetch(url, {
       credentials: 'include', // Отправляем куки для авторизации
       headers: { 'Content-Type': 'application/json' }, // Говорим серверу что отправляем JSON
       ...fetchOptions // Добавляем дополнительные настройки (method, body и т.д.)
     });
+
+    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
 
     // Проверяем успешность запроса
     if (!response.ok) {
@@ -89,12 +93,20 @@ const makeRequest = async (endpoint: string, options: RequestInit & { params?: R
         }
       }
       
+      console.error(`❌ API Error: ${errorMessage}`);
       throw new Error(errorMessage);
     }
 
     // Возвращаем данные в формате JSON
     // Пример: { id: 1, name: 'John', email: 'john@example.com' }
-    return response.json();
+    if (response.status === 204) {
+      // Для DELETE запросов, которые возвращают 204 No Content
+      console.log(`✅ DELETE request successful (204 No Content)`);
+      return null;
+    }
+    const data = await response.json();
+    console.log(`✅ Request successful, data:`, data);
+    return data;
   } catch (error) {
     // Если это ошибка сети или другой тип ошибки
     if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -108,7 +120,7 @@ const makeRequest = async (endpoint: string, options: RequestInit & { params?: R
 
 // ---------------------------------------------------------------------------------------CLIENTS------------------------------------------------------------------------------------------------
 // Оптимизированные функции для клиентов (пример)
-export const getClients = () => makeRequest('clients');
+export const getClients = (): Promise<Client[]> => makeRequest('clients');
 
 export const createClient = (data: { name: string; email: string }) => 
   makeRequest('clients', {
@@ -117,9 +129,11 @@ export const createClient = (data: { name: string; email: string }) =>
   });
 
 export const deleteClient = (id: number) => 
-  makeRequest(`clients/${id}`, { method: 'DELETE' });
+  makeRequest(`clients/${id}`, { method: 'DELETE' }).then(() => {
+    return;
+  });
 
-export const getClientById = (id: number) => 
+export const getClientById = (id: number): Promise<Client> => 
   makeRequest(`clients/${id}`);
 
 export const updateClient = (id: number, data: Record<string, any>) => 
@@ -156,7 +170,9 @@ export const getSessionsByMonth = (year: number, month: number): Promise<Session
   });
 
 export const deleteSession = (id: number): Promise<void> => 
-  makeRequest(`sessions/${id}`, { method: 'DELETE' });
+  makeRequest(`sessions/${id}`, { method: 'DELETE' }).then(() => {
+    return;
+  });
 
 export const updateClientNextSession = (clientId: number, nextSession: string | null) => 
   makeRequest(`clients/${clientId}`, {
@@ -221,34 +237,51 @@ export const updateWorkoutTemplate = (id: number, data: any): Promise<ServerWork
   });
 
 export const deleteWorkoutTemplate = (id: number): Promise<void> => 
-  makeRequest(`workout-templates/${id}`, { method: 'DELETE' });
+  makeRequest(`workout-templates/${id}`, { method: 'DELETE' }).then(() => {
+    return;
+  });
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------PROGRESS------------------------------------------------------------------------------------------------
-export const getClientProgress = (clientId: number): Promise<Progress[]> => 
-  makeRequest(`clients/${clientId}/progress`);
+// Progress Measurement API functions
+export const getClientProgressMeasurements = (clientId: number, page = 1, limit = 50) => 
+  makeRequest(`progress/${clientId}`, { params: { page, limit } });
 
-export const createProgress = (data: CreateProgressData): Promise<Progress> => 
+export const createProgressMeasurement = (data: {
+  clientId: number;
+  date: string;
+  weight?: number;
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  biceps?: number;
+  notes?: string;
+}) => 
   makeRequest('progress', {
     method: 'POST',
     body: JSON.stringify(data)
   });
 
-export const updateProgress = (id: number, data: Partial<CreateProgressData>): Promise<Progress> => 
+export const updateProgressMeasurement = (id: number, data: {
+  date?: string;
+  weight?: number;
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  biceps?: number;
+  notes?: string;
+}) => 
   makeRequest(`progress/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data)
   });
 
-export const deleteProgress = (id: number): Promise<void> => 
-  makeRequest(`progress/${id}`, { method: 'DELETE' });
+export const deleteProgressMeasurement = (id: number): Promise<void> => 
+  makeRequest(`progress/${id}`, { method: 'DELETE' }).then(() => {
+    // DELETE запросы возвращают null, но мы ожидаем void
+    return;
+  });
 
-export const getClientProgressStats = (clientId: number): Promise<ProgressStats> => 
-  makeRequest(`clients/${clientId}/progress-stats`);
-
-export const getProgressByType = (clientId: number, type: string): Promise<Progress[]> => 
-  makeRequest(`clients/${clientId}/progress`, { params: { type } });
-
-export const getProgressByCategory = (clientId: number, category: string): Promise<Progress[]> => 
-  makeRequest(`clients/${clientId}/progress`, { params: { category } });
+export const getClientProgressStats = (clientId: number) => 
+  makeRequest(`progress/${clientId}/stats`);
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

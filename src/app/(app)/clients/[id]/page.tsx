@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getClientById, getSessionsByMonth, updateClient } from '@/lib/api';
 import { Avatar } from '@/components/ui/Avatar';
-import { User, Mail, Phone, MapPin, Crown, Calendar, Clock, TrendingUp, Activity, FileText, Check, X, Pencil } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Crown, Calendar, Clock, Activity, FileText, Check, X, Pencil, TrendingUp, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import toast from 'react-hot-toast';
@@ -121,7 +121,7 @@ function InlineEditField({
       ) : (
         <span className="text-gray-400 italic">{placeholder}</span>
       )}
-      <Pencil size={14} className="opacity-60 group-hover:opacity-100 transition-opacity ml-1" />
+      <Pencil size={14} className="opacity-60 group-hover:opacity-100 transition-opacity ml-1 cursor-pointer" />
     </span>
   );
 }
@@ -167,22 +167,22 @@ function EditableSection({
   };
 
   return (
-    <section className={`border border-gray-100 bg-white rounded-xl p-6 ${className}`}>
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+    <section className={`border border-gray-100 bg-white rounded-xl p-4 ${className}`}>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
           {icon}
           {sectionTitle}
         </h3>
         {!editing && (
-          <button className="text-violet-600 hover:underline text-sm flex items-center gap-1" onClick={() => setEditing(true)}>
-            <Pencil size={16} /> Edit
+          <button className="text-violet-600 hover:underline text-xs flex items-center gap-1 cursor-pointer" onClick={() => setEditing(true)}>
+            <Pencil size={14} className="opacity-60 group-hover:opacity-100 transition-opacity ml-1 cursor-pointer" /> Edit
           </button>
         )}
       </div>
-      <div className="flex flex-col gap-2 text-gray-700">
+      <div className="flex flex-col gap-1.5 text-gray-700">
         {fields.map(f => (
-          <div key={f} className="flex items-center gap-3">
-            <span className="min-w-[80px] font-medium">{labels[f]}:</span>
+          <div key={f} className="flex items-center gap-2">
+            <span className="min-w-[70px] font-medium text-sm">{labels[f]}:</span>
             {editing ? (
               types && types[f] === 'select' && options && options[f] ? (
                 <Select
@@ -217,11 +217,11 @@ function EditableSection({
         ))}
       </div>
       {editing && (
-        <div className="flex gap-2 pt-4">
-          <Button type="button" variant="success" onClick={handleSave} disabled={loading}>
+        <div className="flex gap-2 pt-3">
+          <Button type="button" variant="success" onClick={handleSave} disabled={loading} size="sm">
             Save
           </Button>
-          <Button type="button" variant="danger" onClick={() => setEditing(false)} disabled={loading}>
+          <Button type="button" variant="danger" onClick={() => setEditing(false)} disabled={loading} size="sm">
             Cancel
           </Button>
         </div>
@@ -237,7 +237,7 @@ export default function ClientDetailsPage() {
   const [client, setClient] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'progress'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'sessions'>('overview');
 
   useEffect(() => {
     if (!clientId) return;
@@ -271,34 +271,52 @@ export default function ClientDetailsPage() {
   if (!client) return <div className="text-center py-10">Client not found</div>;
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4">
+    <div className="max-w-6xl mx-auto py-6 px-4">
       {/* Header */}
-      <div className="flex items-center gap-6 mb-8">
+      <div className="flex items-center gap-4 mb-6">
         <Avatar
           name={client.User?.name || 'No Name'}
           photoUrl={client.profile}
-          size="w-20 h-20"
+          size="w-16 h-16"
         />
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">{client.User?.name}</h2>
-          <div className="text-gray-600 text-lg">{client.User?.email}</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">{client.User?.name}</h2>
+          <div className="text-gray-600 text-base">{client.User?.email}</div>
         </div>
       </div>
 
       {/* Plan */}
-      <div className="mb-8">
+      <div className="mb-6 flex items-center justify-between">
         <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${getPlanColor(client.plan)}`}>
           {getPlanIcon(client.plan)}
           {client.plan || 'No plan'}
         </span>
+        
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={() => router.push(`/progress?client=${clientId}`)}
+            className="flex items-center gap-2"
+          >
+            <TrendingUp className="h-4 w-4" />
+            View Progress
+          </Button>
+          <Button
+            onClick={() => router.push(`/progress?client=${clientId}&tab=measurements&add=true`)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Measurement
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6">
+      <div className="flex border-b border-gray-200 mb-4">
         {[
           { id: 'overview', label: 'Overview', icon: User },
-          { id: 'sessions', label: 'Sessions', icon: Calendar },
-          { id: 'progress', label: 'Progress', icon: TrendingUp }
+          { id: 'sessions', label: 'Sessions', icon: Calendar }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -316,9 +334,9 @@ export default function ClientDetailsPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="min-h-[400px]">
+      <div className="min-h-[300px]">
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Contact Info */}
             <EditableSection
               fields={['email', 'phone', 'address']}
@@ -337,61 +355,66 @@ export default function ClientDetailsPage() {
               icon={<User className="h-5 w-5 text-violet-500" />}
             />
             {/* Main Info */}
-            <EditableSection
-              fields={['goal', 'plan', 'age', 'height', 'weight']}
-              values={{
-                goal: client.goal,
-                plan: client.plan,
-                age: client.age,
-                height: client.height,
-                weight: client.weight,
-              }}
-              labels={{
-                goal: 'Goal',
-                plan: 'Plan',
-                age: 'Age',
-                height: 'Height',
-                weight: 'Weight',
-              }}
-              types={{
-                plan: 'select',
-                age: 'number',
-                height: 'number',
-                weight: 'number',
-              }}
-              options={{
-                plan: [
-                  { value: 'Premium Monthly', label: 'Premium Monthly' },
-                  { value: 'Standard Weekly', label: 'Standard Weekly' },
-                  { value: 'Single Session', label: 'Single Session' },
-                ],
-              }}
-              onSave={vals => handleSectionSave(['goal', 'plan', 'age', 'height', 'weight'], vals)}
-              sectionTitle="Main Information"
-            />
+            <div className="lg:col-span-2">
+              <EditableSection
+                fields={['goal', 'plan', 'age', 'height', 'weight', 'targetWeight']}
+                values={{
+                  goal: client.goal,
+                  plan: client.plan,
+                  age: client.age,
+                  height: client.height,
+                  weight: client.weight,
+                  targetWeight: client.targetWeight,
+                }}
+                labels={{
+                  goal: 'Goal',
+                  plan: 'Plan',
+                  age: 'Age',
+                  height: 'Height',
+                  weight: 'Weight',
+                  targetWeight: 'Target Weight',
+                }}
+                types={{
+                  plan: 'select',
+                  age: 'number',
+                  height: 'number',
+                  weight: 'number',
+                  targetWeight: 'number',
+                }}
+                options={{
+                  plan: [
+                    { value: 'Premium Monthly', label: 'Premium Monthly' },
+                    { value: 'Standard Weekly', label: 'Standard Weekly' },
+                    { value: 'Single Session', label: 'Single Session' },
+                  ],
+                }}
+                onSave={vals => handleSectionSave(['goal', 'plan', 'age', 'height', 'weight', 'targetWeight'], vals)}
+                sectionTitle="Main Information"
+              />
+            </div>
           </div>
         )}
         {activeTab === 'sessions' && (
-          <div className="space-y-4">
-            <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-violet-500" />
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-violet-500" />
                 Sessions
             </h3>
             {sessions.length === 0 ? (
-              <div className="text-gray-500">No sessions found for this client.</div>
+              <div className="text-gray-500 text-sm">No sessions found for this client.</div>
             ) : (
               <div className="space-y-2">
                 {sessions.slice(0, 10).map((session) => (
-                  <div key={session.id} className="border border-gray-100 rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between bg-white">
-                    <div className="flex items-center gap-3 mb-2 md:mb-0">
+                  <div key={session.id} className="border border-gray-100 rounded-lg p-3 flex flex-col md:flex-row md:items-center md:justify-between bg-white">
+                    <div className="flex items-center gap-2 mb-1 md:mb-0">
                       <span className={`w-2 h-2 rounded-full ${statusColorMap[session.status || 'scheduled']}`}></span>
-                      <span className="font-medium">{statusLabelMap[session.status || 'scheduled']}</span>
-                      <span className="text-gray-500 text-sm">{session.date?.slice(0, 10)}</span>
-                      {session.duration && <span className="text-gray-500 text-sm">{session.duration} min</span>}
+                      <span className="font-medium text-sm">{statusLabelMap[session.status || 'scheduled']}</span>
+                      <span className="text-gray-500 text-xs">{session.date?.slice(0, 10)}</span>
+                      {session.duration && <span className="text-gray-500 text-xs">{session.duration} min</span>}
                     </div>
                     <div className="flex items-center gap-2">
                       {session.WorkoutTemplate?.name && (
-                        <span className="px-2 py-1 rounded bg-violet-100 text-violet-700 text-xs font-medium">
+                        <span className="px-2 py-0.5 rounded bg-violet-100 text-violet-700 text-xs font-medium">
                           {session.WorkoutTemplate.name}
                         </span>
                       )}
@@ -402,27 +425,7 @@ export default function ClientDetailsPage() {
             )}
           </div>
         )}
-        {activeTab === 'progress' && (
-          <div className="space-y-4">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="h-8 w-8 text-violet-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Progress Tracking</h3>
-              <p className="text-gray-500 mb-6">
-                View detailed progress tracking and analytics for this client
-              </p>
-              <Button
-                onClick={() => router.push(`/clients/${clientId}/progress`)}
-                variant="success"
-                className="flex items-center gap-2 mx-auto"
-              >
-                <TrendingUp className="h-5 w-5" />
-                View Progress
-              </Button>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );

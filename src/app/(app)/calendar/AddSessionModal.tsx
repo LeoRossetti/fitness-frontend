@@ -145,18 +145,14 @@ export default function AddSessionModal({
         </div>
         <div>
           <label className="block text-sm font-medium text-primary mb-2">Time</label>
-          <Select
+          <input
+            type="time"
             name="time"
             value={form.time}
             onChange={handleFormChange}
             required
-          >
-            {timeOptions.map(option => (
-              <option key={option.value} value={option.value} disabled={option.disabled}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
+            className="block w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors duration-200 cursor-pointer"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-primary mb-2">Duration</label>

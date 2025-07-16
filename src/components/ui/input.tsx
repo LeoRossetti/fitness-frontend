@@ -14,6 +14,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           'focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500',
           'disabled:cursor-not-allowed disabled:opacity-50',
           'transition-colors duration-200',
+          'cursor-pointer',
           className
         )}
         ref={ref}

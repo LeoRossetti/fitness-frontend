@@ -17,7 +17,9 @@ export interface Client extends Omit<User, "role"> {
   nextSession?: string;
   age?: number;
   height?: number;
-  weight?: number;
+  weight?: number | null;
+  targetWeight?: number | null;
+  weightDate?: string;
   role: "Client";
   User?: {
     name: string;
@@ -153,6 +155,12 @@ export interface ProgressStats {
   attendanceRate: number;
   averageWeight?: number;
   weightChange?: number;
+  weightGoalProgress?: {
+    targetWeight: number;
+    progress: number;
+    remaining: number;
+    isGoalAchieved: boolean;
+  };
   strengthProgress?: Record<string, { current: number; previous: number; change: number }>;
   measurements?: Record<string, { current: number; previous: number; change: number }>;
 }

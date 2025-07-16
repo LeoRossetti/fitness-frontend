@@ -3,19 +3,14 @@
 import { useEffect, useState } from "react";
 import { getClients, getSessionsByMonth } from "@/lib/api";
 import { Client, Session } from "@/types/types";
-import { Calendar as CalendarIcon, Users, ArrowUpRight } from "lucide-react";
+import { Calendar as CalendarIcon, Users, ArrowUpRight, Plus, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { Avatar } from '@/components/ui/Avatar';
+import { formatDuration } from "@/utils/sessionUtils";
 
 function getTodayISO() {
   const today = new Date();
   return today.toISOString().split("T")[0];
-}
-
-function getInitials(name?: string) {
-  if (!name) return "?";
-  return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
 export default function DashboardPage() {
@@ -51,131 +46,191 @@ export default function DashboardPage() {
   const upcomingSessions = sessions.filter(s => new Date(s.date) >= today);
   const todaySessions = sessions.filter(s => s.date.startsWith(getTodayISO()));
 
-  const clientSessionCount: Record<number, number> = {};
-  sessions.forEach(s => {
-    if (s.clientId) {
-      clientSessionCount[s.clientId] = (clientSessionCount[s.clientId] || 0) + 1;
-    }
-  });
-  const topClients = [...clients]
-    .map(c => ({
-      ...c,
-      sessionCount: clientSessionCount[c.id] || 0,
-    }))
-    .sort((a, b) => b.sessionCount - a.sessionCount)
-    .slice(0, 3);
+  // Простой расчет тренда (для MVP)
+  const clientTrend = activeClients > 0 ? "+3 this month" : "0 this month";
 
-  const cancelledCount = sessions.filter(s => s.status === 'cancelled').length;
-  const completedCount = sessions.filter(s => s.status === 'completed').length;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background-light font-sans p-0 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-4xl font-extrabold mb-2 tracking-tight text-primary">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
               Welcome back{trainerName ? `, ${trainerName}` : ""}!
             </h1>
-            <p className="text-lg text-secondary">Here's what's happening with your clients today.</p>
+            <p className="text-gray-600 text-lg">Here's what's happening with your clients today.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={() => router.push("/calendar?add=true")} className="flex items-center gap-2">
+              <CalendarIcon className="w-4 h-4" />
+              Schedule Session
+            </Button>
+            <Button onClick={() => router.push("/clients?add=true")} variant="default" className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Add New Client
+            </Button>
           </div>
         </div>
 
-        {/* Top cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-          <div className="bg-white rounded-xl shadow-lg p-8 flex items-center justify-between border-t-4 border-main transition hover:shadow-2xl hover:-translate-y-1">
-            <div>
-              <div className="text-secondary text-sm mb-1">Active Clients</div>
-              <div className="text-4xl font-extrabold text-main">{activeClients}</div>
-              <div className="text-success text-xs mt-1 flex items-center gap-1">
-                <ArrowUpRight className="w-4 h-4" />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500 transition hover:shadow-xl hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Active Clients</p>
+                <p className="text-4xl font-bold text-gray-900">{activeClients}</p>
+                <div className="flex items-center gap-1 mt-2">
+                  <ArrowUpRight className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-green-600 font-medium">{clientTrend}</span>
+                </div>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Users className="w-6 h-6 text-blue-600" />
               </div>
             </div>
-            <Users className="w-12 h-12 text-main" />
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-8 flex items-center justify-between border-t-4 border-success transition hover:shadow-2xl hover:-translate-y-1">
-            <div>
-              <div className="text-secondary text-sm mb-1">Upcoming Sessions</div>
-              <div className="text-4xl font-extrabold text-success">{upcomingSessions.length}</div>
-              <div className="text-secondary text-xs mt-1">Today: {todaySessions.length}</div>
-            </div>
-            <CalendarIcon className="w-12 h-12 text-success" />
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-start justify-between border-t-4 border-yellow-400 transition hover:shadow-2xl hover:-translate-y-1">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="inline-block w-3 h-3 rounded-full bg-yellow-400"></span>
-              <span className="text-lg font-semibold text-yellow-600">Cancelled</span>
-            </div>
-            <div className="text-3xl font-extrabold text-yellow-600 mb-2">{cancelledCount}</div>
-            <div className="flex items-center gap-2 text-sm text-secondary mb-4">
-              <span>Completed:</span>
-              <span className="font-bold text-green-600">{completedCount}</span>
-            </div>
-            <div className="flex gap-2 mt-auto">
-              <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">Cancelled</span>
-              <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Completed</span>
+          
+          <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500 transition hover:shadow-xl hover:-translate-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Upcoming Sessions</p>
+                <p className="text-4xl font-bold text-gray-900">{upcomingSessions.length}</p>
+                <p className="text-sm text-gray-500 mt-2">Today: {todaySessions.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <CalendarIcon className="w-6 h-6 text-green-600" />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Upcoming sessions */}
-          <div className="md:col-span-2 bg-white rounded-xl shadow-lg p-8 transition hover:shadow-2xl hover:-translate-y-1">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Upcoming Sessions */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold flex items-center gap-2 text-main">
-                <CalendarIcon className="w-6 h-6" /> Upcoming Sessions
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-violet-500" />
+                Upcoming Sessions
               </h2>
-              <Button variant="default" onClick={() => router.push("/calendar")}>View Calendar</Button>
+              <Button variant="outline" onClick={() => router.push("/calendar")} className="text-sm">
+                View Calendar
+              </Button>
             </div>
-            <ul className="divide-y divide-background-light">
-              {upcomingSessions.slice(0, 5).map(s => {
-                const client = clients.find(c => c.id === s.clientId);
-                return (
-                  <li key={s.id} className="flex items-center justify-between py-4 group">
-                    <div className="flex items-center gap-4">
-                      <Avatar
-                        name={client?.User?.name || 'Client'}
-                        photoUrl={client?.profile}
-                        size="w-12 h-12"
-                      />
-                      <div>
-                        <div className="font-semibold text-primary text-lg group-hover:text-main transition">
-                          {client?.User?.name || "Client"}
+            
+            {upcomingSessions.length > 0 ? (
+              <div className="space-y-4">
+                {upcomingSessions.slice(0, 5).map(s => {
+                  const client = clients.find(c => c.id === s.clientId);
+                  return (
+                    <div key={s.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center">
+                          <span className="text-violet-600 font-medium text-sm">
+                            {client?.User?.name?.charAt(0) || 'C'}
+                          </span>
                         </div>
-                        <div className="text-xs text-secondary mt-1">{new Date(s.date).toLocaleString()}</div>
+                        <div>
+                          <p className="font-medium text-gray-900">{client?.User?.name || "Client"}</p>
+                          <p className="text-sm text-gray-500">{new Date(s.date).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900">{s.time}</p>
+                        <p className="text-xs text-gray-500">
+                          {s.duration ? formatDuration(s.duration) : '—'}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right text-sm text-secondary font-mono min-w-[70px]">{s.time}</div>
-                  </li>
-                );
-              })}
-              {upcomingSessions.length === 0 && <li className="text-secondary py-8 text-center">No upcoming sessions</li>}
-            </ul>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <CalendarIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>No upcoming sessions</p>
+                <Button 
+                  onClick={() => router.push("/calendar?add=true")}
+                  className="mt-2"
+                >
+                  Schedule First Session
+                </Button>
+              </div>
+            )}
           </div>
 
-          {/* Top clients */}
-          <div className="bg-white rounded-xl shadow-lg p-8 transition hover:shadow-2xl hover:-translate-y-1">
-            <h2 className="text-2xl font-semibold mb-6 text-main flex items-center gap-2">
-              <Users className="w-6 h-6" /> Top Performing Clients
-            </h2>
-            <ul>
-              {topClients.map((c, idx) => (
-                <li key={c.id} className="flex items-center gap-4 mb-6 last:mb-0">
-                  <Avatar
-                    name={c.User?.name || 'Client'}
-                    photoUrl={c.profile}
-                    size="w-12 h-12"
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold text-primary text-lg">{c.User?.name}</div>
-                    <div className="w-full bg-background-light rounded-full h-2 mt-2">
-                      <div className="bg-main h-2 rounded-full" style={{ width: `${Math.min(100, (c.sessionCount / (topClients[0]?.sessionCount || 1)) * 100)}%` }}></div>
+          {/* Top Clients */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-violet-500" />
+                Top Performing Clients
+              </h2>
+              <Button variant="outline" onClick={() => router.push("/clients")} className="text-sm">
+                View All
+              </Button>
+            </div>
+            
+            {clients.length > 0 ? (
+              <div className="space-y-4">
+                {clients.slice(0, 3).map((client, index) => {
+                  // Подсчитываем количество сессий для каждого клиента
+                  const clientSessions = sessions.filter(s => s.clientId === client.id);
+                  const completedSessions = clientSessions.filter(s => s.status === 'completed').length;
+                  const totalSessions = clientSessions.length;
+                  
+                  // Вычисляем процент прогресса (завершенные сессии от общего количества)
+                  const progressPercentage = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
+                  
+                  return (
+                    <div key={client.id} className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center">
+                        <span className="text-violet-600 font-medium text-sm">
+                          {client.User?.name?.charAt(0) || 'C'}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-gray-900">{client.User?.name}</p>
+                          <TrendingUp className="w-3 h-3 text-green-500" />
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-violet-500 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${Math.max(10, progressPercentage)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500 font-medium">
+                        {totalSessions} sessions
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-sm text-secondary font-mono min-w-[32px] text-right">{c.sessionCount}</div>
-                </li>
-              ))}
-              {topClients.length === 0 && <li className="text-secondary py-8 text-center">No data</li>}
-            </ul>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p>No clients yet</p>
+                <Button 
+                  onClick={() => router.push("/clients?add=true")}
+                  className="mt-2"
+                >
+                  Add First Client
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

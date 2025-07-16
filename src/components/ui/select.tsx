@@ -18,6 +18,7 @@ export const Select = React.forwardRef<
           'disabled:cursor-not-allowed disabled:opacity-50',
           'transition-colors duration-200',
           'pr-10',
+          'cursor-pointer',
           className
         )}
         onFocus={() => setIsOpen(true)}

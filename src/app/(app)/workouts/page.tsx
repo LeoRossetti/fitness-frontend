@@ -122,14 +122,14 @@ export default function WorkoutsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#1F2A44]">Workout Builder</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1F2A44]">Workout Builder</h1>
             <p className="text-sm text-[#6B7280] mt-1">Create your own workout</p>
           </div>
         </div>
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           <ExerciseLibrary onSelectExercise={handleAddExercise} />
           <WorkoutPlan
             exercises={workoutExercises}
