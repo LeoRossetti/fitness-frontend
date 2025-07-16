@@ -23,7 +23,7 @@ export default function EditClientModal({ clientId, onClose, onUpdated }: Props)
     name: '',
     email: '',
     phone: '',
-    plan: 'Standard Weekly' as const,
+    plan: 'Standard Weekly' as 'Premium Monthly' | 'Standard Weekly' | 'Single Session',
   });
 
   useEffect(() => {
