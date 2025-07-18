@@ -50,9 +50,52 @@ export default function HomePage() {
         <section className="py-16">
           <div className="max-w-6xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-[#1F2A44] mb-8">See TrainerHub in Action</h2>
-            <div className="relative max-w-3xl mx-auto">
-              <div className="bg-gray-200 rounded-lg shadow-lg h-64 flex items-center justify-center">
-                <p className="text-gray-500">VIDEO</p>
+            <div className="relative max-w-4xl mx-auto">
+              {/* Custom Video Player */}
+              <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl bg-gray-900">
+                <video
+                  controls
+                  poster="/demo-thumbnail.jpg"
+                  className="w-full h-full object-cover"
+                  preload="metadata"
+                  controlsList="nodownload"
+                >
+                  <source src="/demo-video.mp4" type="video/mp4" />
+                  <source src="/demo-video.webm" type="video/webm" />
+                  <source src="/demo-video.mov" type="video/quicktime" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              
+              {/* Option 3: Interactive Play Button Overlay (uncomment to use) */}
+              {/*
+              <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl bg-gradient-to-br from-violet-600 to-purple-700 group cursor-pointer">
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center group-hover:bg-opacity-20 transition-all duration-300">
+                  <div className="bg-white bg-opacity-90 rounded-full p-6 group-hover:scale-110 transition-transform duration-300">
+                    <svg className="w-12 h-12 text-violet-600 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h3 className="text-xl font-semibold">Watch Demo</h3>
+                  <p className="text-white text-opacity-80">See how TrainerHub works</p>
+                </div>
+              </div>
+              */}
+            </div>
+            
+            {/* Video Description */}
+            <div className="mt-8 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-600 mb-4">
+                Watch how TrainerHub streamlines your personal training business with intuitive client management, 
+                seamless scheduling, and comprehensive progress tracking.
+              </p>
+              <div className="flex justify-center gap-4 text-sm text-gray-500">
+                <span>✓ Client Management</span>
+                <span>✓ Session Scheduling</span>
+                <span>✓ Progress Tracking</span>
+                <span>✓ Workout Templates</span>
               </div>
             </div>
           </div>
