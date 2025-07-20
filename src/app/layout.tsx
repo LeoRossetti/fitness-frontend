@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./styles/globals.css";
 import "./styles/animations.css";
 import { Toaster } from "react-hot-toast";
+import { ConvexClientProvider } from "@/components/providers/ConvexProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,8 +24,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body>
-        {children}
-        <Toaster position="top-right" />
+        <ErrorBoundary>
+          <ConvexClientProvider>
+            {children}
+            <Toaster position="top-right" />
+          </ConvexClientProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
