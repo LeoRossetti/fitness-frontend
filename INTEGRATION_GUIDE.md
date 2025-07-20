@@ -27,6 +27,8 @@ Your Convex deployment is already configured:
 # Install dependencies (if not already done)
 npm install
 
+npx convex dev --once
+
 # Start the development server
 npm run dev
 
